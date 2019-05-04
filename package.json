@@ -1,0 +1,15 @@
+{
+  "name": "bumpit-server",
+  "version": "1.0.0",
+  "description": "Server for bump it",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "morgan": "^1.9.1"
+  }
+}
