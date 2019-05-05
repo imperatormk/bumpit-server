@@ -1,5 +1,3 @@
-global.__basedir = __dirname
-
 const express = require('express')
 const logger = require('morgan')
 const bodyParser = require('body-parser')
