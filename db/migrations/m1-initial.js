@@ -129,6 +129,10 @@ const images = (Sequelize) => ({
     },
     allowNull: false
   },
+  url: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
   featured: {
     type: Sequelize.BOOLEAN,
     defaultValue: false
@@ -261,23 +265,23 @@ const connections = (Sequelize) => ({
     primaryKey: true,
     type: Sequelize.INTEGER
   },
-  usrFrom: {
+  usrFromId: {
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
       model: 'users',
       key: 'id',
-      as: 'usrFrom'
+      as: 'usrFromId'
     },
     allowNull: false
   },
-  usrTo: {
+  usrToId: {
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
       model: 'users',
       key: 'id',
-      as: 'usrTo'
+      as: 'usrToId'
     },
     allowNull: false
   },
