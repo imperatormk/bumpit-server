@@ -1,9 +1,9 @@
 const Sequelize = require('sequelize');
 
 const dbConfig = require(__basedir + '/db/config/config.js')
-const sequelize = new Sequelize(dbConfig.test.database, dbConfig.test.username, dbConfig.test.password, {
-  host: dbConfig.test.host,
-  dialect: dbConfig.test.dialect
+const sequelize = new Sequelize(dbConfig.database, dbConfig.username, dbConfig.password, {
+  host: dbConfig.host,
+  dialect: dbConfig.dialect
 })
 
 sequelize
