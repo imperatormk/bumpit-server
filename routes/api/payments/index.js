@@ -1,14 +1,20 @@
 const express = require('express')
 const router = express.Router()
-const braintree = require(__basedir + '/services/braintree')
+const stripe = require(__basedir + '/services/stripe')
 
-router.get('/token', (req, res) => {
-  braintree.clientToken.generate({}, function (err, response) {
-    if (err) return res.status(500).send({ error: err })
+router.post('/charge', function(req, res) {
+    var stripeToken = req.body.token
 
-    const clientToken = response.clientToken
-    res.json({ token: clientToken })
-  })
+    const chargeObj = { // temp data
+      amount: 50,
+      currency: 'USD',
+      card: stripeToken,
+      description: 'thou shall be a desc'
+    }
+
+    return stripe.charges.create(chargeObj)
+      .then(stripeRes => res.send(stripeRes))
+      .catch(err => res.status(err.statusCode).send(err))
 })
 
 module.exports = router
