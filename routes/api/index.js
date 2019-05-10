@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const paymentsRoutes = require('./payments')
+const itemsRoutes = require('./items')
 
 const checkEmptyBody = (req, res, next) => {
 	const body = req.body
@@ -22,5 +23,6 @@ const convertToNumbers = (req, res, next) => {
 router.use(convertToNumbers) // doesn't work atm
 
 router.use('/payments', paymentsRoutes)
+router.use('/items', itemsRoutes)
 
 module.exports = router

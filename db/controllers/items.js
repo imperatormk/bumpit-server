@@ -1,13 +1,23 @@
 const exportsObj = {}
 
 const Item = require('../models').item
+const Image = require('../models').image
 
 exportsObj.getItems = () => {
 	return Item.findAll()
 }
 
 exportsObj.getItem = (itemId) => {
-	return Item.findOne({ where: { id: itemId } })
+	const options = {
+		include: [{
+			model: Image,
+			as: 'images'
+		}],
+		where: {
+			id: itemId
+		}
+	}
+	return Item.findOne(options)
 }
 
 exportsObj.insertItem = (item) => {
