@@ -12,4 +12,4 @@ require(__basedir + '/db')
 
 const server = http.createServer(app)
 server.listen(port)
-console.log('started on port ' + port)
+console.log('Started on port ' + port)

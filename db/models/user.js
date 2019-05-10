@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
   })
   User.associate = function(models) {
     User.hasMany(models.item, {
-      foreignKey: 'usrId',
+      foreignKey: 'selId',
       as: 'items'
     })
     User.hasMany(models.review, {

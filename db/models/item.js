@@ -6,6 +6,7 @@ module.exports = (sequelize, DataTypes) => {
     condition: DataTypes.INTEGER,
     price: DataTypes.FLOAT,
     currency: DataTypes.INTEGER,
+    size: DataTypes.STRING,
     location: DataTypes.STRING,
     status: DataTypes.INTEGER,
   })
@@ -15,7 +16,7 @@ module.exports = (sequelize, DataTypes) => {
       as: 'category'
     })
     Item.belongsTo(models.user, {
-      foreignKey: 'usrId',
+      foreignKey: 'selId',
       as: 'seller'
     })
     Item.hasMany(models.like, {
@@ -25,10 +26,6 @@ module.exports = (sequelize, DataTypes) => {
     Item.hasMany(models.image, {
       foreignKey: 'itmId',
       as: 'images'
-    })
-    Item.hasMany(models.connection, {
-      foreignKey: 'usrId',
-      as: 'connections'
     })
   }
   return Item
