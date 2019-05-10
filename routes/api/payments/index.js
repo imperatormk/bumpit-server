@@ -3,8 +3,7 @@ const router = express.Router()
 const stripe = require(__basedir + '/services/stripe')
 
 router.post('/charge', function(req, res) {
-    var stripeToken = req.body.token
-
+    const stripeToken = req.body.token
     const chargeObj = { // temp data
       amount: 50,
       currency: 'USD',

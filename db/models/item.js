@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     price: DataTypes.FLOAT,
     currency: DataTypes.INTEGER,
     location: DataTypes.STRING,
+    status: DataTypes.INTEGER,
   })
   Item.associate = function(models) {
     Item.belongsTo(models.category, {

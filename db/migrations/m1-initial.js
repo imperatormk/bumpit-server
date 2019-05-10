@@ -102,6 +102,10 @@ const items = (Sequelize) => ({
     type: Sequelize.STRING,
     allowNull: false
   },
+  status: {
+    type: Sequelize.INTEGER,
+    defaultValue: 0
+  },
   createdAt: {
     type: Sequelize.DATE,
     defaultValue: Sequelize.NOW // bad
@@ -167,6 +171,14 @@ const reviews = (Sequelize) => ({
     },
     allowNull: false,
     unique: 'reviewUnique'
+  },
+  rating: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  message: {
+    type: Sequelize.STRING,
+    allowNull: false
   },
   createdAt: {
     type: Sequelize.DATE,
