@@ -6,6 +6,21 @@ module.exports = (sequelize, DataTypes) => {
     bio: DataTypes.TEXT,
     email: DataTypes.TEXT,
     phone: DataTypes.TEXT,
+    rating: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const reviews = this.getDataValue('reviews')
+        if (reviews && reviews.length) {
+          const rating = reviews.map(val => val.rating).reduce((acc, val) => acc + val) / reviews.length
+          return rating
+        }
+        return null
+      }
+    }
+  }, {
+    defaultScope: {
+      include: [{ model: sequelize.models.review, as: 'reviews', attributes: ['rating'] }]
+    }
   })
   User.associate = function(models) {
     User.hasMany(models.item, {
