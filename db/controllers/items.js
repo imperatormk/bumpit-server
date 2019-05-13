@@ -5,7 +5,16 @@ const Image = require('../models').image
 const User = require('../models').user
 
 exportsObj.getItems = () => {
-	return Item.findAll()
+	const options = {
+		include: [{
+			model: Image,
+			as: 'images'
+		}],
+		where: {
+			id: itemId
+		}
+	}
+	return Item.findAll(options)
 }
 
 exportsObj.getItem = (itemId) => {

@@ -71,7 +71,7 @@ module.exports = {
             url: 'https://via.placeholder.com/500x300',
           }, {
             itmId: 2,
-            url: 'https://via.placeholder.com/600x400',
+            url: 'https://via.placeholder.com/400x600',
           }], {});
           
           const reviews = queryInterface.bulkInsert('reviews', [{
