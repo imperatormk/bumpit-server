@@ -2,6 +2,7 @@ const exportsObj = {}
 
 const Item = require('../models').item
 const Image = require('../models').image
+const User = require('../models').user
 
 exportsObj.getItems = () => {
 	return Item.findAll()
@@ -12,6 +13,9 @@ exportsObj.getItem = (itemId) => {
 		include: [{
 			model: Image,
 			as: 'images'
+		}, {
+			model: User,
+			as: 'seller'
 		}],
 		where: {
 			id: itemId
