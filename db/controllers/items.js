@@ -9,10 +9,7 @@ exportsObj.getItems = () => {
 		include: [{
 			model: Image,
 			as: 'images'
-		}],
-		where: {
-			id: itemId
-		}
+		}]
 	}
 	return Item.findAll(options)
 }
