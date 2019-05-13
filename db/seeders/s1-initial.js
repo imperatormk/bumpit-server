@@ -68,10 +68,10 @@ module.exports = {
       	return Promise.all([items, connections]).then(() => {
       	  const images = queryInterface.bulkInsert('images', [{
             itmId: 1,
-            url: 'testurlA',
+            url: 'https://via.placeholder.com/500x300',
           }, {
             itmId: 2,
-            url: 'testUrlB',
+            url: 'https://via.placeholder.com/600x400',
           }], {});
           
           const reviews = queryInterface.bulkInsert('reviews', [{
