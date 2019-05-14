@@ -24,6 +24,10 @@ const users = (Sequelize) => ({
     allowNull: false,
     unique: true
   },
+  password: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
   location: {
     type: Sequelize.STRING,
     allowNull: false
