@@ -107,8 +107,8 @@ const items = (Sequelize) => ({
     allowNull: false
   },
   status: {
-    type: Sequelize.INTEGER,
-    defaultValue: 0
+    type: Sequelize.STRING,
+    defaultValue: 'AVAILABLE'
   },
   createdAt: {
     type: Sequelize.DATE,

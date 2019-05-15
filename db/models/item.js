@@ -8,7 +8,7 @@ module.exports = (sequelize, DataTypes) => {
     currency: DataTypes.INTEGER,
     size: DataTypes.STRING,
     location: DataTypes.STRING,
-    status: DataTypes.INTEGER,
+    status: DataTypes.STRING,
   })
   Item.associate = function(models) {
     Item.belongsTo(models.category, {
@@ -18,6 +18,10 @@ module.exports = (sequelize, DataTypes) => {
     Item.belongsTo(models.user, {
       foreignKey: 'selId',
       as: 'seller'
+    })
+    Item.hasOne(models.purchase, {
+      foreignKey: 'itmId',
+      as: 'purchase'
     })
     Item.hasMany(models.like, {
       foreignKey: 'itmId',
