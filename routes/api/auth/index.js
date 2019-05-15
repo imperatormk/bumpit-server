@@ -4,9 +4,7 @@ const authMiddleware = require(__basedir + '/services/auth').middleware
 const login = require(__basedir + '/services/auth').login
 
 router.get('/user', authMiddleware, (req, res) => {
-  return res.json({
-    user: req.user
-  })
+  return res.json(req.user)
 })
 
 router.post('/login', login)
