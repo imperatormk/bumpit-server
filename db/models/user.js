@@ -36,9 +36,9 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'usrId',
       as: 'likes'
     })
-    User.hasMany(models.purchase, {
+    User.hasMany(models.order, {
       foreignKey: 'usrId',
-      as: 'purchases'
+      as: 'orders'
     })
     User.hasMany(models.connection, {
       foreignKey: 'usrId',

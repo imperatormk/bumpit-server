@@ -2,7 +2,7 @@ const exportsObj = {}
 
 const Purchase = require('../models').purchase
 
-exportsObj.getPurchases = () => {
+exportsObj.getOrders = () => {
 	return Purchase.findAll()
 }
 

@@ -99,7 +99,7 @@ module.exports = {
             updatedAt: Sequelize.fn('NOW') // temp
           }], {});
 
-          const purchases = queryInterface.bulkInsert('purchases', [{
+          const orders = queryInterface.bulkInsert('orders', [{
             txnId: 'thisisatxn',
             usrId: 1,
             itmId: 2,
@@ -107,7 +107,7 @@ module.exports = {
             updatedAt: Sequelize.fn('NOW') // temp
           }], {});
 
-          return Promise.all([images, reviews, likes, purchases])
+          return Promise.all([images, reviews, likes, orders])
         })
       })
   },
@@ -123,8 +123,8 @@ module.exports = {
           const images = queryInterface.bulkDelete('images', null, {});
           const reviews = queryInterface.bulkDelete('reviews', null, {});
           const likes = queryInterface.bulkDelete('likes', null, {});
-          const purchases = queryInterface.bulkDelete('purchases', null, {});
-          return Promise.all([images, reviews, likes, purchases])
+          const orders = queryInterface.bulkDelete('orders', null, {});
+          return Promise.all([images, reviews, likes, orders])
         })
       })
   }

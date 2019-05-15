@@ -233,7 +233,7 @@ const likes = (Sequelize) => ({
   }
 })
 
-const purchases = (Sequelize) => ({
+const orders = (Sequelize) => ({
   id: {
     allowNull: false,
     autoIncrement: true,
@@ -333,8 +333,8 @@ module.exports = {
               const imagesP = queryInterface.createTable('images', images(Sequelize))
               const reviewsP = queryInterface.createTable('reviews', reviews(Sequelize))
               const likesP = queryInterface.createTable('likes', likes(Sequelize))
-              const purchasesP = queryInterface.createTable('purchases', purchases(Sequelize))
-              return Promise.all([imagesP, reviewsP, likesP, purchasesP])
+              const ordersP = queryInterface.createTable('orders', orders(Sequelize))
+              return Promise.all([imagesP, reviewsP, likesP, ordersP])
                 .then(() => {
                   const reviewsU = addUnique(queryInterface, 'reviews', ['itmId', 'usrId'])
                   const likesU = addUnique(queryInterface, 'likes', ['itmId', 'usrId'])
@@ -349,9 +349,9 @@ module.exports = {
       const imagesP = queryInterface.dropTable('images')
       const reviewsP = queryInterface.dropTable('reviews')
       const likesP = queryInterface.dropTable('likes')
-      const purchasesP = queryInterface.dropTable('purchases')
+      const ordersP = queryInterface.dropTable('orders')
 
-      return Promise.all([imagesP, reviewsP, likesP, purchasesP])
+      return Promise.all([imagesP, reviewsP, likesP, ordersP])
         .then(() => {
           const itemsP = queryInterface.dropTable('items')
           const connectionsP = queryInterface.dropTable('connections')

@@ -19,9 +19,9 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'selId',
       as: 'seller'
     })
-    Item.hasOne(models.purchase, {
+    Item.hasOne(models.order, {
       foreignKey: 'itmId',
-      as: 'purchase'
+      as: 'order'
     })
     Item.hasMany(models.like, {
       foreignKey: 'itmId',

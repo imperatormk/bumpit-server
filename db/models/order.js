@@ -1,17 +1,17 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
-  const Purchase = sequelize.define('purchase', {
+  const Order = sequelize.define('order', {
     txnId: DataTypes.STRING,
   })
-  Purchase.associate = function(models) {
-    Purchase.belongsTo(models.item, {
+  Order.associate = function(models) {
+    Order.belongsTo(models.item, {
       foreignKey: 'itmId',
       as: 'item'
     })
-    Purchase.belongsTo(models.user, {
+    Order.belongsTo(models.user, {
       foreignKey: 'usrId',
       as: 'buyer'
     })
   }
-  return Purchase
+  return Order
 }
