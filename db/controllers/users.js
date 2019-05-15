@@ -7,7 +7,11 @@ exportsObj.getUsers = () => {
 }
 
 exportsObj.getUser = (userId) => {
-	return User.findOne({ where: { id: userId }})
+	return User.findOne({ where: { id: userId } })
+}
+
+exportsObj.getUserAuth = (userDetails) => {
+	return User.findOne({ where: userDetails })
 }
 
 exportsObj.insertUser = (user) => {
@@ -15,7 +19,7 @@ exportsObj.insertUser = (user) => {
 }
 
 exportsObj.deleteUser = (userId) => {
-	return User.destroy({ where: { id: userId }})
+	return User.destroy({ where: { id: userId } })
 	  .then(() => ({ id: userId }))
 }
 
