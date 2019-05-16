@@ -1,22 +1,22 @@
 const exportsObj = {}
 
-const Purchase = require('../models').purchase
+const Order = require('../models').order
 
 exportsObj.getOrders = () => {
-	return Purchase.findAll()
+	return Order.findAll()
 }
 
-exportsObj.getPurchase = (purId) => {
-	return Purchase.findOne({ where: { id: purId }})
+exportsObj.getOrder = (ordId) => {
+	return Order.findOne({ where: { id: ordId }})
 }
 
-exportsObj.insertPurchase = (purchase) => {
-	return Purchase.create(purchase)
+exportsObj.insertOrder = (order) => {
+	return Order.create(order)
 }
 
-exportsObj.deletePurchase = (purId) => {
-	return Purchase.destroy({ where: { id: purId }})
-	  .then(() => ({ id: purId }))
+exportsObj.deleteOrder = (ordId) => {
+	return Order.destroy({ where: { id: ordId }})
+	  .then(() => ({ id: ordId }))
 }
 
 module.exports = exportsObj
