@@ -1,4 +1,4 @@
-'use strict';
+'use strict'
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
@@ -6,7 +6,7 @@ module.exports = {
         name: 'Underwear'
       }, {
         name: 'Shoes'
-      }], {});
+      }], {})
   
   	  const users = queryInterface.bulkInsert('users', [{
       	username: 'imperatormk',
@@ -26,7 +26,7 @@ module.exports = {
         phone: '069-320-420',
         createdAt: Sequelize.fn('NOW'), // temp
         updatedAt: Sequelize.fn('NOW') // temp
-      }], {});
+      }], {})
   
   	  return Promise.all([categories, users]).then(() => {
         const items = queryInterface.bulkInsert('items', [{
@@ -53,7 +53,7 @@ module.exports = {
           location: 'S Home',
           createdAt: Sequelize.fn('NOW'), // temp
           updatedAt: Sequelize.fn('NOW') // temp
-        }], {});
+        }], {})
 
         const connections = queryInterface.bulkInsert('connections', [{
           usrFromId: 1,
@@ -65,7 +65,7 @@ module.exports = {
           usrToId: 1,
           createdAt: Sequelize.fn('NOW'), // temp
           updatedAt: Sequelize.fn('NOW') // temp
-        }], {});
+        }], {})
 
       	return Promise.all([items, connections]).then(() => {
       	  const images = queryInterface.bulkInsert('images', [{
@@ -74,7 +74,7 @@ module.exports = {
           }, {
             itmId: 2,
             url: 'https://via.placeholder.com/400x600',
-          }], {});
+          }], {})
           
           const reviews = queryInterface.bulkInsert('reviews', [{
             usrId: 1,
@@ -90,14 +90,14 @@ module.exports = {
             message: 'Not bad for a single shoe',
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp
-          }], {});
+          }], {})
 
           const likes = queryInterface.bulkInsert('likes', [{
             usrId: 1,
             itmId: 2,
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp
-          }], {});
+          }], {})
 
           const orders = queryInterface.bulkInsert('orders', [{
             txnId: 'thisisatxn',
@@ -105,27 +105,54 @@ module.exports = {
             itmId: 2,
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp
-          }], {});
+          }], {})
 
           return Promise.all([images, reviews, likes, orders])
+            .then(() => {
+              const charges = queryInterface.bulkInsert('charges', [{
+                txnId: 'order1_1',
+                amount: 85,
+                amountRefunded: 0,
+                currency: 'usd',
+                status: 'succeeded',
+                ordId: 1,
+                createdAt: Sequelize.fn('NOW'), // temp
+                updatedAt: Sequelize.fn('NOW') // temp
+              }, {
+                txnId: 'order1_2',
+                amount: 0,
+                amountRefunded: -85,
+                currency: 'usd',
+                status: 'succeeded',
+                ordId: 1,
+                createdAt: Sequelize.fn('NOW'), // temp
+                updatedAt: Sequelize.fn('NOW') // temp
+              }], {})
+
+              return Promise.all([charges])
+            })
         })
       })
   },
   down: (queryInterface, Sequelize) => {
-  	const categories = queryInterface.bulkDelete('categories', null, {});
-  	const users = queryInterface.bulkDelete('users', null, {});
-  	return Promise.all([categories, users])
-  	  .then(() => {
-    	const items = queryInterface.bulkDelete('items', null, {});
-      const connections = queryInterface.bulkDelete('connections', null, {});
-    	return Promise.all([items, connections])
-        .then(() => {
-          const images = queryInterface.bulkDelete('images', null, {});
-          const reviews = queryInterface.bulkDelete('reviews', null, {});
-          const likes = queryInterface.bulkDelete('likes', null, {});
-          const orders = queryInterface.bulkDelete('orders', null, {});
-          return Promise.all([images, reviews, likes, orders])
-        })
+    const charges = queryInterface.bulkDelete('charges', null, {})
+    return Promise.all([charges])
+      .then(() => {
+        const categories = queryInterface.bulkDelete('categories', null, {})
+        const users = queryInterface.bulkDelete('users', null, {})
+        return Promise.all([categories, users])
+          .then(() => {
+          const items = queryInterface.bulkDelete('items', null, {})
+          const connections = queryInterface.bulkDelete('connections', null, {})
+          return Promise.all([items, connections])
+            .then(() => {
+              const images = queryInterface.bulkDelete('images', null, {})
+              const reviews = queryInterface.bulkDelete('reviews', null, {})
+              const likes = queryInterface.bulkDelete('likes', null, {})
+              const orders = queryInterface.bulkDelete('orders', null, {})
+              return Promise.all([images, reviews, likes, orders])
+            })
+          })
       })
   }
-};
+}
