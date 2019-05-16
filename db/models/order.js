@@ -12,9 +12,9 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'usrId',
       as: 'buyer'
     })
-    Order.hasMany(models.charge, {
+    Order.hasOne(models.charge, {
       foreignKey: 'ordId',
-      as: 'charges'
+      as: 'charge'
     })
   }
   return Order
