@@ -36,7 +36,7 @@ module.exports = {
           details: 'Very well kept',
           condition: 2,
           price: 1.19,
-          currency: 1,
+          currency: 'EUR',
           size: 'Test size A',
           location: 'U Home',
           createdAt: Sequelize.fn('NOW'), // temp
@@ -48,7 +48,7 @@ module.exports = {
           details: 'Just one though',
           condition: 1,
           price: 4.49,
-          currency: 2,
+          currency: 'USD',
           size: 'Test size B',
           location: 'S Home',
           createdAt: Sequelize.fn('NOW'), // temp

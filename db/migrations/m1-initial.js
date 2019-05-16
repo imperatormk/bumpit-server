@@ -95,7 +95,7 @@ const items = (Sequelize) => ({
     allowNull: false
   },
   currency: {
-    type: Sequelize.INTEGER,
+    type: Sequelize.STRING,
     allowNull: false
   },
   size: {
