@@ -2,6 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Order = sequelize.define('order', {
     txnId: DataTypes.STRING,
+    status: DataTypes.STRING,
   })
   Order.associate = function(models) {
     Order.belongsTo(models.item, {

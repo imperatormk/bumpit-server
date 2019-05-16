@@ -244,6 +244,10 @@ const orders = (Sequelize) => ({
     type: Sequelize.STRING,
     allowNull: false
   },
+  status: {
+    type: Sequelize.STRING,
+    defaultValue: 'RECEIVED'
+  },
   usrId: {
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
