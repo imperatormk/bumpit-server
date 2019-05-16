@@ -100,7 +100,6 @@ module.exports = {
           }], {})
 
           const orders = queryInterface.bulkInsert('orders', [{
-            txnId: 'thisisatxn',
             usrId: 1,
             itmId: 2,
             createdAt: Sequelize.fn('NOW'), // temp

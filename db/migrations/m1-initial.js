@@ -240,10 +240,6 @@ const orders = (Sequelize) => ({
     primaryKey: true,
     type: Sequelize.INTEGER
   },
-  txnId: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
   status: {
     type: Sequelize.STRING,
     defaultValue: 'RECEIVED'

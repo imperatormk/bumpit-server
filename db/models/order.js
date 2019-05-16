@@ -1,7 +1,6 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Order = sequelize.define('order', {
-    txnId: DataTypes.STRING,
     status: DataTypes.STRING,
   })
   Order.associate = function(models) {
@@ -12,6 +11,10 @@ module.exports = (sequelize, DataTypes) => {
     Order.belongsTo(models.user, {
       foreignKey: 'usrId',
       as: 'buyer'
+    })
+    Order.hasMany(models.charge, {
+      foreignKey: 'ordId',
+      as: 'charges'
     })
   }
   return Order
