@@ -1,6 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const paymentsRoutes = require('./payments')
+const ordersRoutes = require('./orders')
 const itemsRoutes = require('./items')
 const authRoutes = require('./auth')
 
@@ -24,6 +25,7 @@ const convertToNumbers = (req, res, next) => {
 router.use(convertToNumbers) // doesn't work atm
 
 router.use('/payments', paymentsRoutes)
+router.use('/orders', ordersRoutes)
 router.use('/items', itemsRoutes)
 router.use('/auth', authRoutes)
 
