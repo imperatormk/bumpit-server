@@ -274,6 +274,43 @@ const orders = (Sequelize) => ({
   }
 })
 
+const connections = (Sequelize) => ({
+  id: {
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+    type: Sequelize.INTEGER
+  },
+  usrFromId: {
+    type: Sequelize.INTEGER,
+    onDelete: 'CASCADE',
+    references: {
+      model: 'users',
+      key: 'id',
+      as: 'usrFromId'
+    },
+    allowNull: false
+  },
+  usrToId: {
+    type: Sequelize.INTEGER,
+    onDelete: 'CASCADE',
+    references: {
+      model: 'users',
+      key: 'id',
+      as: 'usrToId'
+    },
+    allowNull: false
+  },
+  createdAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW // bad
+  },
+  updatedAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW // bad
+  }
+})
+
 const charges = (Sequelize) => ({
   id: {
     allowNull: false,
@@ -321,30 +358,36 @@ const charges = (Sequelize) => ({
   }
 })
 
-const connections = (Sequelize) => ({
+const refunds = (Sequelize) => ({
   id: {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
     type: Sequelize.INTEGER
   },
-  usrFromId: {
-    type: Sequelize.INTEGER,
-    onDelete: 'CASCADE',
-    references: {
-      model: 'users',
-      key: 'id',
-      as: 'usrFromId'
-    },
+  refId: {
+    type: Sequelize.STRING,
     allowNull: false
   },
-  usrToId: {
+  amount: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  currency: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  status: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  chgId: {
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
-      model: 'users',
+      model: 'charges',
       key: 'id',
-      as: 'usrToId'
+      as: 'chgId'
     },
     allowNull: false
   },
@@ -370,11 +413,10 @@ module.exports = {
     return queryInterface.sequelize.transaction((t) => {
       const categoriesP = queryInterface.createTable('categories', categories(Sequelize))
       const usersP = queryInterface.createTable('users', users(Sequelize))
-
       return Promise.all([categoriesP, usersP])
-      .then(() => {
-        const itemsP = queryInterface.createTable('items', items(Sequelize))
-        const connectionsP = queryInterface.createTable('connections', connections(Sequelize))
+        .then(() => {
+          const itemsP = queryInterface.createTable('items', items(Sequelize))
+          const connectionsP = queryInterface.createTable('connections', connections(Sequelize))
           return Promise.all([itemsP, connectionsP])
             .then(() => {
               const imagesP = queryInterface.createTable('images', images(Sequelize))
@@ -386,10 +428,15 @@ module.exports = {
                   const chargesP = queryInterface.createTable('charges', charges(Sequelize))
                   return Promise.all([chargesP])
                     .then(() => {
-                      const chargesU = addUnique(queryInterface, 'charges', ['txnId'])
-                      const reviewsU = addUnique(queryInterface, 'reviews', ['itmId', 'usrId'])
-                      const likesU = addUnique(queryInterface, 'likes', ['itmId', 'usrId'])
-                      return Promise.all([chargesU, reviewsU, likesU])
+                      const refundsP = queryInterface.createTable('refunds', refunds(Sequelize))
+                      return Promise.all([refundsP])
+                        .then(() => {
+                          const reviewsU = addUnique(queryInterface, 'reviews', ['itmId', 'usrId'])
+                          const likesU = addUnique(queryInterface, 'likes', ['itmId', 'usrId'])
+                          const chargesU = addUnique(queryInterface, 'charges', ['txnId'])
+                          const refundsU = addUnique(queryInterface, 'refunds', ['refId'])
+                          return Promise.all([reviewsU, likesU, chargesU, refundsU])
+                        })
                     })
                 })
             })
@@ -398,25 +445,28 @@ module.exports = {
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction((t) => {
-      const chargesP = queryInterface.dropTable('charges')
-      return Promise.all([chargesP])
+      const refundsP = queryInterface.dropTable('refunds')
+      return Promise.all([refundsP])
         .then(() => {
-          const imagesP = queryInterface.dropTable('images')
-          const reviewsP = queryInterface.dropTable('reviews')
-          const likesP = queryInterface.dropTable('likes')
-          const ordersP = queryInterface.dropTable('orders')
-
-          return Promise.all([imagesP, reviewsP, likesP, ordersP])
+          const chargesP = queryInterface.dropTable('charges')
+          return Promise.all([chargesP])
             .then(() => {
-              const itemsP = queryInterface.dropTable('items')
-              const connectionsP = queryInterface.dropTable('connections')
-              return Promise.all([itemsP, connectionsP])
+              const imagesP = queryInterface.dropTable('images')
+              const reviewsP = queryInterface.dropTable('reviews')
+              const likesP = queryInterface.dropTable('likes')
+              const ordersP = queryInterface.dropTable('orders')
+              return Promise.all([imagesP, reviewsP, likesP, ordersP])
                 .then(() => {
-                  const categoriesP = queryInterface.dropTable('categories')
-                  const usersP = queryInterface.dropTable('users')
-                  return Promise.all([categoriesP, usersP])
-                })
-          })
+                  const itemsP = queryInterface.dropTable('items')
+                  const connectionsP = queryInterface.dropTable('connections')
+                  return Promise.all([itemsP, connectionsP])
+                    .then(() => {
+                      const categoriesP = queryInterface.dropTable('categories')
+                      const usersP = queryInterface.dropTable('users')
+                      return Promise.all([categoriesP, usersP])
+                    })
+              })
+            })
         })
     })
   }

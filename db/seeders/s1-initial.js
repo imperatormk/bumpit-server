@@ -101,6 +101,11 @@ module.exports = {
 
           const orders = queryInterface.bulkInsert('orders', [{
             usrId: 1,
+            itmId: 1,
+            createdAt: Sequelize.fn('NOW'), // temp
+            updatedAt: Sequelize.fn('NOW') // temp
+          }, {
+            usrId: 1,
             itmId: 2,
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp
@@ -110,7 +115,7 @@ module.exports = {
             .then(() => {
               const charges = queryInterface.bulkInsert('charges', [{
                 txnId: 'order1_1',
-                amount: 85,
+                amount: 8500,
                 amountRefunded: 0,
                 currency: 'usd',
                 status: 'succeeded',
@@ -118,17 +123,33 @@ module.exports = {
                 createdAt: Sequelize.fn('NOW'), // temp
                 updatedAt: Sequelize.fn('NOW') // temp
               }, {
-                txnId: 'order1_2',
-                amount: 0,
-                amountRefunded: -85,
+                txnId: 'order2_1',
+                amount: 8500,
+                amountRefunded: 8500,
                 currency: 'usd',
                 status: 'succeeded',
-                ordId: 1,
+                ordId: 2,
                 createdAt: Sequelize.fn('NOW'), // temp
                 updatedAt: Sequelize.fn('NOW') // temp
               }], {})
 
               return Promise.all([charges])
+                .then(() => {
+                  const refunds = queryInterface.bulkInsert('refunds', [{
+                    refId: 'refund1_2',
+                    chgId: 2,
+                    amount: 10,
+                    currency: 'usd',
+                    status: 'succeeded'
+                  }, {
+                    refId: 'refund2_2',
+                    chgId: 2,
+                    amount: 20,
+                    currency: 'usd',
+                    status: 'succeeded'
+                  }], {})
+                  return Promise.all([refunds])
+                })
             })
         })
       })

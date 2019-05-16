@@ -12,6 +12,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'ordId',
       as: 'order'
     })
+    Charge.hasMany(models.refund, {
+      foreignKey: 'chgId',
+      as: 'refunds'
+    })
   }
   return Charge
 }
