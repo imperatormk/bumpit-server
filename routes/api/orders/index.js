@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const authMiddleware = require(__basedir + '/services/auth').middleware
 const db = require(__basedir + '/db/controllers')
-const stripe = require(__basedir + '/services/stripe')
+const payments = require(__basedir + '/services/payments')
 
 router.get('/:id', function(req, res) {
   const id = req.params.id
@@ -27,26 +27,23 @@ router.post('/', authMiddleware, function(req, res) {
     })
     .then((item) => {
       if (item.status !== 'AVAILABLE') return res.status(400).send({ msg: 'itemUnavailable' })
+      const orderObj = {
+        usrId: userId,
+        itmId: itemId
+      }
       const chargeObj = {
         amount: item.price * 100, // is 100 a given?
         currency: item.currency,
         card: paymentToken,
         description: `Order for item #${itemId}`
       }
-
-      return stripe.charges.create(chargeObj)
-        .then((chargeRes) => {
-          const orderObj = {
-            txnId: chargeRes.id,
-            usrId: userId,
-            itmId: itemId
-          }
-          return db.items.modifyItem({ ...item, status: 'SOLD' })
-            .then(() => db.orders.insertOrder(orderObj))
-            .then((orderRes) => res.send(orderRes))
-        })
+      // TODO: this HAS to be transactional
+      return db.orders.insertOrder(orderObj)
+        .then((orderRes) => payments.createCharge(chargeObj, orderRes.id))
+        .then(() => db.items.modifyItem({ ...item, status: 'SOLD' }))
+        .then(() => res.send({ success: true }))
     })
-    .catch(err => res.status(err.status || 500).send({ msg: err.msg || 'unknownError' }))
+    .catch(err => res.status(err.status || err.statusCode || 500).send({ msg: err.msg || err.message || err || 'unknownError' }))
 })
 
 module.exports = router
