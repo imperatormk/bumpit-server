@@ -102,11 +102,13 @@ module.exports = {
           const orders = queryInterface.bulkInsert('orders', [{
             usrId: 1,
             itmId: 1,
+            status: 'PROCESSING',
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp
           }, {
             usrId: 1,
             itmId: 2,
+            status: 'PROCESSING',
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp
           }], {})

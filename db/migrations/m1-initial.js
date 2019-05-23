@@ -242,7 +242,7 @@ const orders = (Sequelize) => ({
   },
   status: {
     type: Sequelize.STRING,
-    defaultValue: 'RECEIVED'
+    allowNull: false
   },
   usrId: {
     type: Sequelize.INTEGER,
@@ -261,6 +261,41 @@ const orders = (Sequelize) => ({
       model: 'items',
       key: 'id',
       as: 'itmId'
+    },
+    allowNull: false
+  },
+  createdAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW // bad
+  },
+  updatedAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW // bad
+  }
+})
+
+const events = (Sequelize) => ({
+  id: {
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+    type: Sequelize.INTEGER
+  },
+  type: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  entryId: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
+  ordId: {
+    type: Sequelize.INTEGER,
+    onDelete: 'CASCADE',
+    references: {
+      model: 'orders',
+      key: 'id',
+      as: 'ordId'
     },
     allowNull: false
   },
@@ -425,8 +460,9 @@ module.exports = {
               const ordersP = queryInterface.createTable('orders', orders(Sequelize))
               return Promise.all([imagesP, reviewsP, likesP, ordersP])
                 .then(() => {
+                  const eventsP = queryInterface.createTable('events', events(Sequelize))
                   const chargesP = queryInterface.createTable('charges', charges(Sequelize))
-                  return Promise.all([chargesP])
+                  return Promise.all([eventsP, chargesP])
                     .then(() => {
                       const refundsP = queryInterface.createTable('refunds', refunds(Sequelize))
                       return Promise.all([refundsP])
