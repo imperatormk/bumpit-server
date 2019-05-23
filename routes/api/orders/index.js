@@ -35,7 +35,7 @@ router.post('/', authMiddleware, function(req, res) { // here charge event is cr
         status: 'PROCESSING'
       }
       const chargeObj = {
-        amount: item.price * 100, // is 100 a given?
+        amount: item.price,
         currency: item.currency,
         card: paymentToken,
         description: `Order for item #${itemId}`

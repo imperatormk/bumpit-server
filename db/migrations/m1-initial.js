@@ -91,7 +91,7 @@ const items = (Sequelize) => ({
     allowNull: false
   },
   price: {
-    type: Sequelize.FLOAT,
+    type: Sequelize.INTEGER,
     allowNull: false
   },
   currency: {
