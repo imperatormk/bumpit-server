@@ -274,6 +274,45 @@ const orders = (Sequelize) => ({
   }
 })
 
+const shippings = (Sequelize) => ({
+  id: {
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+    type: Sequelize.INTEGER
+  },
+  address: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  trackingNo: {
+    type: Sequelize.STRING,
+    allowNull: true
+  },
+  status: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  ordId: {
+    type: Sequelize.INTEGER,
+    onDelete: 'CASCADE',
+    references: {
+      model: 'orders',
+      key: 'id',
+      as: 'ordId'
+    },
+    allowNull: false
+  },
+  createdAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW // bad
+  },
+  updatedAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW // bad
+  }
+})
+
 const events = (Sequelize) => ({
   id: {
     allowNull: false,
@@ -462,16 +501,18 @@ module.exports = {
                 .then(() => {
                   const eventsP = queryInterface.createTable('events', events(Sequelize))
                   const chargesP = queryInterface.createTable('charges', charges(Sequelize))
-                  return Promise.all([eventsP, chargesP])
+                  const shippingsP = queryInterface.createTable('shippings', shippings(Sequelize))
+                  return Promise.all([eventsP, chargesP, shippingsP])
                     .then(() => {
                       const refundsP = queryInterface.createTable('refunds', refunds(Sequelize))
                       return Promise.all([refundsP])
                         .then(() => {
                           const reviewsU = addUnique(queryInterface, 'reviews', ['itmId', 'usrId'])
                           const likesU = addUnique(queryInterface, 'likes', ['itmId', 'usrId'])
+                          const eventsU = addUnique(queryInterface, 'events', ['type', 'ordId'])
                           const chargesU = addUnique(queryInterface, 'charges', ['txnId'])
                           const refundsU = addUnique(queryInterface, 'refunds', ['refId'])
-                          return Promise.all([reviewsU, likesU, chargesU, refundsU])
+                          return Promise.all([reviewsU, likesU, eventsU, chargesU, refundsU])
                         })
                     })
                 })
@@ -484,8 +525,10 @@ module.exports = {
       const refundsP = queryInterface.dropTable('refunds')
       return Promise.all([refundsP])
         .then(() => {
+          const eventsP = queryInterface.dropTable('events')
           const chargesP = queryInterface.dropTable('charges')
-          return Promise.all([chargesP])
+          const shippingsP = queryInterface.dropTable('shippings')
+          return Promise.all([chargesP, eventsP, shippingsP])
             .then(() => {
               const imagesP = queryInterface.dropTable('images')
               const reviewsP = queryInterface.dropTable('reviews')
