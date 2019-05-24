@@ -408,6 +408,10 @@ const charges = (Sequelize) => ({
     type: Sequelize.STRING,
     allowNull: false
   },
+  stage: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
   status: {
     type: Sequelize.STRING,
     allowNull: false

@@ -120,7 +120,8 @@ module.exports = {
                 amount: 8500,
                 amountRefunded: 0,
                 currency: 'usd',
-                status: 'ESCROW',
+                stage: 'ESCROW',
+                status: 'succeeded',
                 ordId: 1,
                 createdAt: Sequelize.fn('NOW'), // temp
                 updatedAt: Sequelize.fn('NOW') // temp
@@ -129,7 +130,8 @@ module.exports = {
                 amount: 8500,
                 amountRefunded: 8500,
                 currency: 'usd',
-                status: 'ESCROW',
+                stage: 'ESCROW',
+                status: 'succeeded',
                 ordId: 2,
                 createdAt: Sequelize.fn('NOW'), // temp
                 updatedAt: Sequelize.fn('NOW') // temp

@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
     amount: DataTypes.INTEGER,
     amountRefunded: DataTypes.INTEGER,
     currency: DataTypes.STRING,
+    stage: DataTypes.STRING,
     status: DataTypes.STRING,
   })
   Charge.associate = function(models) {
