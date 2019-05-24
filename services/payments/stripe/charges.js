@@ -1,6 +1,6 @@
 const exportsObj = {}
 const db = require(__basedir + '/db/controllers')
-const stripe = require('../provider')
+const stripe = require('./provider')
 
 exportsObj.createCharge = (chargeObj, orderId) => {
   return stripe.charges.create(chargeObj)

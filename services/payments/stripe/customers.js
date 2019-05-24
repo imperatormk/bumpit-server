@@ -1,5 +1,5 @@
 const exportsObj = {}
-const stripe = require('../provider')
+const stripe = require('./provider')
 
 const createCustomer = (user) => {
   const customer = {
