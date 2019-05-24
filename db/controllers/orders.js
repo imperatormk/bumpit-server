@@ -7,13 +7,24 @@ exportsObj.getOrders = () => {
 	return Order.findAll()
 }
 
-exportsObj.getOrder = (ordId) => {
+exportsObj.getOrderById = (orderId) => {
 	const options = {
 		include: [{
 			model: Item,
 			as: 'item'
 		}],
-		where: { id: ordId }
+		where: { id: orderId }
+	}
+	return Order.findOne(options)
+}
+
+exportsObj.getOrder = (order) => {
+	const options = {
+		include: [{
+			model: Item,
+			as: 'item'
+		}],
+		where: order
 	}
 	return Order.findOne(options)
 }
