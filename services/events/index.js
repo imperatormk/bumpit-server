@@ -4,7 +4,7 @@ const db = require(__basedir + '/db/controllers')
 const validateEvent = (eventObj) => {
   const allFilled = eventObj && eventObj.type && eventObj.entryId && eventObj.ordId
   if (!allFilled) return false
-  const validTypes = ['CHARGE', 'SHIPPING', 'DISPUTE', 'COMPLETION', 'REFUND', 'REVIEW']
+  const validTypes = ['CHARGE', 'SHIPPING', 'DISPUTE', 'COMPLETION', 'REFUND']
   if (!validTypes.includes(eventObj.type)) return false
   return true
 }
@@ -15,8 +15,7 @@ const moveToNextState = (eventType) => {
     'SHIPPING': 'IN_TRANSIT',
     'DISPUTE': 'DISPUTED',
     'COMPLETION': 'COMPLETED',
-    'REFUND': 'REFUNDED',
-    'REVIEW': 'REVIEWED'
+    'REFUND': 'REFUNDED'
   }
   return map[eventType] || null
 }
