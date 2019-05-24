@@ -6,10 +6,10 @@ const db = require(__basedir + '/db/controllers')
 
 const loginFn = (req, res, next) => {
   passport.authenticate('login', (err, user, info) => {
-    if (err) return res.status(500).send(err)
-    if (info) return res.status(400).send(info)
+    if (err) return next(err)
+    if (info) return next(err)
     return req.logIn(user, (err) => {
-      if (err) return res.status(401).send(err)
+      if (err) return next(err)
       return db.users.getUserAuth({ username: user.username })
         .then((user) => {
           const token = jwt.sign({ username: user.username }, jwtSecret.secret)

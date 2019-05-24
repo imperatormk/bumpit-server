@@ -14,34 +14,34 @@ passport.use('register', new LocalStrategy({
   usernameField: 'username',
   passwordField: 'password',
   session: false
-}, (username, password, done) => {
+}, (username, password, next) => {
   return db.users.getUserAuth({ username })
     .then((user) => {
-      if (user != null) return done(null, false, { msg: 'usernameTaken' })
+      if (user != null) return next(null, false, { status: 409, msg: 'usernameTaken' })
       return bcrypt.hash(password, BCRYPT_SALT_ROUNDS)
         .then((hashedPassword) => {
           return User.create({ username, password: hashedPassword })
-            .then(user => done(null, user.toJSON()))
+            .then(user => next(null, user.toJSON()))
         })
     })
-    .catch(err => done(err))
+    .catch(err => next(err))
 }))
 
 passport.use('login', new LocalStrategy({
   usernameField: 'username',
   passwordField: 'password',
   session: false
-}, (username, password, done) => {
+}, (username, password, next) => {
   return db.users.getUserAuth({ username })
     .then((user) => {
-      if (!user) return done(null, false, { msg: 'badUsername' })
+      if (!user) return next(null, false, { status: 401, msg: 'badUsername' })
       return bcrypt.compare(password, user.password)
         .then((response) => {
-          if (!response) return done(null, false, { msg: 'badPassword' })
-          return done(null, user.toJSON())
+          if (!response) return next(null, false, { status: 401, msg: 'badPassword' })
+          return next(null, user.toJSON())
         })
     })
-    .catch(err => done(err))
+    .catch(err => next(err))
 }))
 
 const opts = {
@@ -49,19 +49,21 @@ const opts = {
   secretOrKey: jwtSecret.secret
 }
 
-passport.use('jwt', new JwtStrategy(opts, (jwtPayload, done) => {
+passport.use('jwt', new JwtStrategy(opts, (jwtPayload, next) => {
   return db.users.getUserAuth({ username: jwtPayload.username })
     .then((user) => {
-      if (user) { done(null, user) }
-      else { done(null, false) }
+      if (user) { next(null, user) }
+      else { next(null, false) }
     })
-    .catch(err => done(err))
+    .catch((err) => {
+      next(err)
+    })
 }))
 
-passport.serializeUser((user, done) => {
-  done(null, user)
+passport.serializeUser((user, next) => {
+  next(null, user)
 })
 
-passport.deserializeUser((user, done) => {
-  done(null, user)
+passport.deserializeUser((user, next) => {
+  next(null, user)
 })

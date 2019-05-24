@@ -6,17 +6,17 @@ const db = require(__basedir + '/db/controllers')
 const paymentsService = require(__basedir + '/services/payments')
 const eventsService = require(__basedir + '/services/events')
 
-router.get('/:id', function(req, res) {
+router.get('/:id', function(req, res, next) {
   const id = req.params.id
   return db.orders.getOrderById(id)
     .then((item) => {
-      if (!item) return res.status(404).send({ msg: 'notFound' })
+      if (!item) return next({ status: 404, msg: 'notFound' })
       return res.send(item)
     })
-    .catch(err => res.status(500).send(err))
+    .catch(err => next(err))
 })
 
-router.post('/', authMiddleware, function(req, res) { // here charge event is created
+router.post('/', authMiddleware, function(req, res, next) { // here charge event is created
   const order = req.body
   const itemId = order.itemId
   const paymentToken = order.paymentToken
@@ -24,12 +24,12 @@ router.post('/', authMiddleware, function(req, res) { // here charge event is cr
 
   return db.items.getItem(itemId) // DRY!
     .then((item) => {
-      if (!item) throw ({ status: 400, msg: 'badItem' })
+      if (!item) return next({ status: 400, msg: 'badItem' })
       return item.toJSON()
     })
     .then((item) => {
-      if (item.status !== 'AVAILABLE') return res.status(400).send({ msg: 'itemUnavailable' })
-      const orderObj = { // TODO: use this?
+      if (item.status !== 'AVAILABLE') return next({ status: 400, msg: 'itemUnavailable' })
+      const orderObj = {
         usrId: userId,
         itmId: itemId,
         status: 'PROCESSING'
@@ -63,20 +63,20 @@ router.post('/', authMiddleware, function(req, res) { // here charge event is cr
             .then(() => res.send({ success: true }))
         })
     })
-    .catch(err => res.status(err.status || err.statusCode || 500).send({ msg: err.msg || err.message || err || 'unknownError' }))
+    .catch(err => next(err))
 })
 
-router.post('/:id/ship', (req, res) => {
+router.post('/:id/ship', (req, res, next) => {
   const orderId = req.params.id
   const shipping = req.body
 
   return db.orders.getOrderById(orderId) // DRY!
     .then((order) => {
-      if (!order) throw ({ status: 400, msg: 'badOrder' })
+      if (!order) return next({ status: 400, msg: 'badOrder' })
       return order.toJSON()
     })
     .then((order) => {
-      if (order.status !== 'PROCESSING') return res.status(400).send({ msg: 'orderNotShippable' })
+      if (order.status !== 'PROCESSING') return next({ status: 400, msg: 'orderNotShippable' })
       shipping.ordId = orderId
 
       return db.shipping.insertShipping(shipping)
@@ -91,20 +91,20 @@ router.post('/:id/ship', (req, res) => {
         })
         .then(() => res.send({ success: true }))
     })
-    .catch(err => res.status(err.status || err.statusCode || 500).send({ msg: err.msg || err.message || err || 'unknownError' })) // DRY
+    .catch(err => next(err))
 })
 
-router.post('/:id/complete', (req, res) => {
+router.post('/:id/complete', (req, res, next) => {
   const orderId = req.params.id
 
   return db.orders.getOrderById(orderId) // DRY!
     .then((order) => {
-      if (!order) throw ({ status: 400, msg: 'badOrder' })
+      if (!order) return next({ status: 400, msg: 'badOrder' })
       return order.toJSON()
     })
     .then((order) => {
       const validStatuses = ['IN_TRANSIT', 'IN_DISPUTE']
-      if (!validStatuses.includes(order.status)) return res.status(400).send({ msg: 'orderNotCompleteable' })
+      if (!validStatuses.includes(order.status)) return next({ status: 400, msg: 'orderNotCompleteable' })
 
       return paymentsService.releaseFunds(orderId)
         .then(() => {
@@ -117,22 +117,22 @@ router.post('/:id/complete', (req, res) => {
         })
         .then(() => res.send({ success: true }))
     })
-    .catch(err => res.status(err.status || err.statusCode || 500).send({ msg: err.msg || err.message || err || 'unknownError' })) // DRY
+    .catch(err => next(err))
 })
 
-router.post('/:id/refund', (req, res) => {
+router.post('/:id/refund', (req, res, next) => {
   const orderId = req.params.id
   const refund = req.body
   const refundAmount = refund.amount || null
 
   return db.orders.getOrderById(orderId) // DRY!
     .then((order) => {
-      if (!order) throw ({ status: 400, msg: 'badOrder' })
-      if (refundAmount != null && (refundAmount > order.price || refundAmount <= 0)) throw ({ status: 400, msg: 'invalidRefund' })
+      if (!order) return next({ status: 400, msg: 'badOrder' })
+      if (refundAmount != null && (refundAmount > order.price || refundAmount <= 0)) next({ status: 400, msg: 'invalidRefund' })
       return order.toJSON()
     })
     .then((order) => {
-      if (order.status === 'COMPLETED') return res.status(400).send({ msg: 'orderNotRefundable' })
+      if (order.status === 'COMPLETED') return next({ status: 400, msg: 'orderNotRefundable' })
 
       return paymentsService.refundOrder(orderId, refundAmount)
         .then((refund) => {
@@ -150,7 +150,7 @@ router.post('/:id/refund', (req, res) => {
         })
         .then(() => res.send({ success: true }))
     })
-    .catch(err => res.status(err.status || err.statusCode || 500).send({ msg: err.msg || err.message || err || 'unknownError' })) // DRY
+    .catch(err => next(err))
 })
 
 module.exports = router

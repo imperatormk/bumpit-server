@@ -8,7 +8,7 @@ const authRoutes = require('./auth')
 const checkEmptyBody = (req, res, next) => {
 	const body = req.body
 	if (!body || Object.keys(body).length === 0) {
-    return res.status(400).send({ 'status': 'emptyBody' })
+    return next({ status: 400, msg: 'emptyBody' })
   }
 	next()
 }
