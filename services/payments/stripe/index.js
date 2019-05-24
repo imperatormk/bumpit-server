@@ -16,10 +16,6 @@ const createCharge = (charge, orderId) => {
     .then((chargeRes) => ({ id: chargeRes.id }))
 }
 
-const changeCustomerBalance = (customerId, changeBy) => {
-  return Promise.resolve({ success: true }) // mock
-}
-
 const releaseFunds = (orderId) => {
   if (!orderId) return Promise.reject({ msg: 'invalidOrder' })
 
@@ -29,15 +25,9 @@ const releaseFunds = (orderId) => {
   return Promise.all([getOrder, getCharge])
     .then(([order, charge]) => {
       if (order.status === 'RELEASED') return Promise.reject({ msg: 'paymentAlreadyReleased' })
-
-      const sellerId = order.item.selId
-      const chargeAmount = charge.amount
-      return changeCustomerBalance(sellerId, chargeAmount)
-        .then(() => {
-          return db.charges.modifyCharge({ id: charge.id, status: 'RELEASED' })
-        })
+      return db.charges.modifyCharge({ id: charge.id, status: 'RELEASED' })
     })
-}
+} 
 
 exportsObj.createCharge = createCharge
 exportsObj.releaseFunds = releaseFunds
