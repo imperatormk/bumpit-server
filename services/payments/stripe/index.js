@@ -18,7 +18,7 @@ exportsObj.createCharge = (chargeObj, orderId) => {
 exportsObj.releaseFunds = (orderId) => {
   return db.charges.getCharge({ ordId: orderId })
     .then((charge) => {
-      if (charge.stage === 'RELEASED') return Promise.reject({ msg: 'paymentAlreadyReleased' })
+      if (charge.stage === 'RELEASED') return Promise.reject({ status: 400, msg: 'paymentAlreadyReleased' })
       return db.charges.updateCharge({ id: charge.id, stage: 'RELEASED' })
     })
 }

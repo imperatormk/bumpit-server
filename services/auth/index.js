@@ -1,7 +1,6 @@
 const exportsObj = {}
-const login = require('./login')
-const middleware = require('./middleware')
 
-exportsObj.login = login
-exportsObj.middleware = middleware
+exportsObj.login = require('./login')
+exportsObj.middleware = require('./middleware')
+
 module.exports = exportsObj

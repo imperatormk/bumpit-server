@@ -20,8 +20,8 @@ const moveToNextState = (eventType) => {
   return map[eventType] || null
 }
 
-const createEvent = (event) => {
-  if (!validateEvent(event)) return Promise.reject({ msg: 'invalidEvent' })
+exportsObj.createEvent = (event) => {
+  if (!validateEvent(event)) return Promise.reject({ status: 400, msg: 'invalidEvent' })
   return db.events.insertEvent(event)
     .then(() => {
       const nextState = moveToNextState(event.type)
@@ -29,7 +29,5 @@ const createEvent = (event) => {
       return db.orders.updateOrder({ status: nextState, id: orderId })
     })
 }
-
-exportsObj.createEvent = createEvent
 
 module.exports = exportsObj
