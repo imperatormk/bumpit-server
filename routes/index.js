@@ -16,7 +16,12 @@ router.use('/api', apiRoutes)
 router.use((err, req, res, next) => {
   if (!err) return next()
   // TODO: add logger
-  return res.status(err.status || err.statusCode || 500).send({ msg: err.msg || err.message || err || 'unknownError' })
+  const status = err.status || err.statusCode || 500
+  const body = {
+    msg: err.msg || err.message || err || 'unknownError',
+    details: err.details
+  }
+  return res.status(status).send(body)
 })
 
 module.exports = router
