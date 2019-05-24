@@ -7,6 +7,7 @@ module.exports = (sequelize, DataTypes) => {
     bio: DataTypes.TEXT,
     email: DataTypes.TEXT,
     phone: DataTypes.TEXT,
+    stripeCustId: DataTypes.STRING,
     rating: {
       type: DataTypes.VIRTUAL,
       get() {

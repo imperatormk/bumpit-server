@@ -15,6 +15,7 @@ module.exports = {
         bio: 'Coder?',
         email: 'darko.simonovski@hotmail.com',
         phone: '076-314-010',
+        stripeCustId: 'cus_F7h2ocdiAVzL0B', // subject of change?
         createdAt: Sequelize.fn('NOW'), // temp
         updatedAt: Sequelize.fn('NOW') // temp
       }, {
@@ -24,6 +25,7 @@ module.exports = {
         bio: 'Coder?',
         email: 'mr.mach@gmail.com',
         phone: '069-320-420',
+        stripeCustId: 'cus_F7oP9ZWmkeB9S2', // subject of change?
         createdAt: Sequelize.fn('NOW'), // temp
         updatedAt: Sequelize.fn('NOW') // temp
       }], {})

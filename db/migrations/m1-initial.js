@@ -46,6 +46,10 @@ const users = (Sequelize) => ({
     type: Sequelize.STRING,
     defaultValue: ''
   },
+  stripeCustId: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
   createdAt: {
     type: Sequelize.DATE,
     defaultValue: Sequelize.NOW // bad
