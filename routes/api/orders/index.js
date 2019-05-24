@@ -8,7 +8,7 @@ const eventsService = require(__basedir + '/services/events')
 
 router.get('/:id', function(req, res) {
   const id = req.params.id
-  return db.orders.getOrder(id)
+  return db.orders.getOrderById(id)
     .then((item) => {
       if (!item) return res.status(404).send({ msg: 'notFound' })
       return res.send(item)
@@ -70,7 +70,7 @@ router.post('/:id/ship', (req, res) => {
   const shipping = req.body
   const orderId = req.params.id
 
-  return db.orders.getOrder(orderId) // DRY!
+  return db.orders.getOrderById(orderId) // DRY!
     .then((order) => {
       if (!order) throw ({ status: 400, msg: 'badOrder' })
       return order.toJSON()
@@ -88,8 +88,34 @@ router.post('/:id/ship', (req, res) => {
             ordId: orderId
           }
           return eventsService.createEvent(event)
-            .then(() => res.send({ success: true }))
         })
+        .then(() => res.send({ success: true }))
+    })
+    .catch(err => res.status(err.status || err.statusCode || 500).send({ msg: err.msg || err.message || err || 'unknownError' })) // DRY
+})
+
+router.post('/:id/complete', (req, res) => {
+  const orderId = req.params.id
+
+  return db.orders.getOrderById(orderId) // DRY!
+    .then((order) => {
+      if (!order) throw ({ status: 400, msg: 'badOrder' })
+      return order.toJSON()
+    })
+    .then((order) => {
+      const validStatuses = ['IN_TRANSIT', 'IN_DISPUTE']
+      if (!validStatuses.includes(order.status)) return res.status(400).send({ msg: 'orderNotCompleteable' })
+
+      return paymentsService.releaseFunds(orderId)
+        .then(() => {
+          const event = {
+            type: 'COMPLETION',
+            entryId: -1, // TODO: think about a model here
+            ordId: orderId
+          }
+          return eventsService.createEvent(event)
+        })
+        .then(() => res.send({ success: true }))
     })
     .catch(err => res.status(err.status || err.statusCode || 500).send({ msg: err.msg || err.message || err || 'unknownError' })) // DRY
 })

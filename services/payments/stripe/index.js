@@ -10,12 +10,36 @@ const createCharge = (charge, orderId) => {
       amount: chargeRes.amount,
       amountRefunded: chargeRes.amount_refunded,
       currency: chargeRes.currency,
-      status: chargeRes.status,
+      status: 'ESCROW', // TODO: maybe we should also utilize the stripe status
       ordId: orderId
     }))
     .then((chargeRes) => ({ id: chargeRes.id }))
 }
 
+const changeCustomerBalance = (customerId, changeBy) => {
+  return Promise.resolve({ success: true }) // mock
+}
+
+const releaseFunds = (orderId) => {
+  if (!orderId) return Promise.reject({ msg: 'invalidOrder' })
+
+  const getOrder = db.orders.getOrderById(orderId)
+  const getCharge = db.charges.getCharge({ ordId: orderId })
+
+  return Promise.all([getOrder, getCharge])
+    .then(([order, charge]) => {
+      if (order.status === 'RELEASED') return Promise.reject({ msg: 'paymentAlreadyReleased' })
+
+      const sellerId = order.item.selId
+      const chargeAmount = charge.amount
+      return changeCustomerBalance(sellerId, chargeAmount)
+        .then(() => {
+          return db.charges.modifyCharge({ id: charge.id, status: 'RELEASED' })
+        })
+    })
+}
+
 exportsObj.createCharge = createCharge
+exportsObj.releaseFunds = releaseFunds
 
 module.exports = exportsObj
