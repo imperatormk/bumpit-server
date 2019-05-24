@@ -42,13 +42,16 @@ const checkDuplicateValues = (user) => {
 
 exportsObj.register = (user) => {
   const sanitizationResult = sanitizeUser(user)
-  if (!sanitizationResult) return Promise.reject({ status: 400, msg: 'emptyUser' })
-  if (sanitizationResult.badFields) return Promise.reject({ status: 400, msg: 'invalidFields', details: sanitizedUser.badFields })
+  if (!sanitizationResult) 
+    return Promise.reject({ status: 400, msg: 'emptyUser' })
+  if (sanitizationResult.badFields) 
+    return Promise.reject({ status: 400, msg: 'invalidFields', details: sanitizedUser.badFields })
 
   const sanitizedUser = sanitizationResult.user
   return checkDuplicateValues(sanitizedUser)
     .then((duplicateValues) => {
-      if (duplicateValues.length) return Promise.reject({ status: 409, msg: 'duplicateFields', details: duplicateValues })
+      if (duplicateValues.length)
+        return Promise.reject({ status: 409, msg: 'duplicateFields', details: duplicateValues })
       return helper.hashPassword(sanitizedUser.password)
         .then(hashedPassword => ({ ...user, password: hashedPassword }))
         .then(user => customersService.createCustomerIfNotExists(user, 'email')

@@ -2,7 +2,10 @@ const exportsObj = {}
 const db = require(__basedir + '/db/controllers')
 
 const validateEvent = (eventObj) => {
-  const allFilled = eventObj && eventObj.type && eventObj.entryId && eventObj.ordId
+  const allFilled = eventObj
+    && eventObj.type 
+    && eventObj.entryId
+    && eventObj.ordId
   if (!allFilled) return false
   const validTypes = ['CHARGE', 'SHIPPING', 'DISPUTE', 'COMPLETION', 'REFUND']
   if (!validTypes.includes(eventObj.type)) return false
@@ -21,7 +24,8 @@ const moveToNextState = (eventType) => {
 }
 
 exportsObj.createEvent = (event) => {
-  if (!validateEvent(event)) return Promise.reject({ status: 400, msg: 'invalidEvent' })
+  if (!validateEvent(event))
+    return Promise.reject({ status: 400, msg: 'invalidEvent' })
   return db.events.insertEvent(event)
     .then(() => {
       const nextState = moveToNextState(event.type)

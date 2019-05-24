@@ -2,6 +2,7 @@ const exportsObj = {}
 
 const Order = require('../models').order
 const Product = require('../models').product
+const User = require('../models').user
 
 exportsObj.getOrders = () => {
 	return Order.findAll()
@@ -11,7 +12,14 @@ exportsObj.getOrderById = (orderId) => {
 	const options = {
 		include: [{
 			model: Product,
-			as: 'product'
+			as: 'product',
+			include: [{
+				model: User,
+				as: 'seller'
+			}]
+		}, {
+			model: User,
+			as: 'buyer'
 		}],
 		where: { id: orderId }
 	}
