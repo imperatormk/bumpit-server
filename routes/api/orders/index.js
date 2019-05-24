@@ -24,7 +24,10 @@ router.post('/', authMiddleware, function(req, res, next) { // here charge event
 
   return db.products.getProduct(productId) // DRY!
     .then((product) => {
-      if (!product) return next({ status: 400, msg: 'badProduct' })
+      if (!product)
+        return next({ status: 400, msg: 'badProduct' })
+      if (product.selId === userId)
+        return next({ status: 400, msg: 'cantBuyFromSelf' })
       return product.toJSON()
     })
     .then((product) => {
@@ -103,8 +106,9 @@ router.post('/:id/complete', (req, res, next) => {
       return order.toJSON()
     })
     .then((order) => {
-      const validStatuses = ['IN_TRANSIT', 'IN_DISPUTE']
-      if (!validStatuses.includes(order.status)) return next({ status: 400, msg: 'orderNotCompleteable' })
+      const allowedStatuses = ['IN_TRANSIT', 'IN_DISPUTE']
+      if (!allowedStatuses.includes(order.status))
+        return next({ status: 400, msg: 'orderNotCompleteable' })
 
       return chargesService.releaseFunds(orderId)
         .then(() => {
@@ -128,7 +132,8 @@ router.post('/:id/refund', (req, res, next) => {
   return db.orders.getOrderById(orderId) // DRY!
     .then((order) => {
       if (!order) return next({ status: 400, msg: 'badOrder' })
-      if (refundAmount != null && (refundAmount > order.price || refundAmount <= 0)) next({ status: 400, msg: 'invalidRefund' })
+      if (refundAmount != null && (refundAmount > order.price || refundAmount <= 0))
+        return next({ status: 400, msg: 'invalidRefund' })
       return order.toJSON()
     })
     .then((order) => {
@@ -149,6 +154,25 @@ router.post('/:id/refund', (req, res, next) => {
           return eventsService.createEvent(event)
         })
         .then(() => res.send({ success: true }))
+    })
+    .catch(err => next(err))
+})
+
+router.post('/:id/claim', (req, res, next) => { // not the best endpoint?
+  const orderId = req.params.id
+
+  return db.orders.getOrderById(orderId) // DRY!
+    .then((order) => {
+      if (!order)
+        return next({ status: 400, msg: 'badOrder' })
+      return order.toJSON()
+    })
+    .then((order) => {
+      const allowedStatuses = ['COMPLETED', 'REFUNDED']
+      if (!allowedStatuses.includes(order.status)) 
+        return next({ status: 400, msg: 'orderStillPending' })
+      return chargesService.claimFunds(orderId)
+        .then(result => res.send(result))
     })
     .catch(err => next(err))
 })

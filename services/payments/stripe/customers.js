@@ -15,7 +15,8 @@ const createCustomer = (user) => {
 // next time you'll probably be able to use promises :)
 const wrappedFunctions = [
   { title: 'getCustomersByCriteria', name: 'list', params: ['criteria'] },
-  { title: 'getCustomerById', name: 'retrieve', params: ['custId'] }
+  { title: 'getCustomerById', name: 'retrieve', params: ['custId'] },
+  { title: 'updateCustomer', name: 'update', params: ['custId', 'config'] },
 ]
 wrappedFunctions.forEach((fn) => {
   exportsObj[fn.title] = (...args) => {
@@ -40,6 +41,22 @@ exportsObj.createCustomerIfNotExists = (user, uniqueKey) => {
     .then(resp => resp.data)
     .then(customers => customers[0] || null)
     .then(customer => customer || createCustomer(user))
+}
+
+exportsObj.updateCustomerBalanceBy = (custId, amount) => {
+  return exportsObj.getCustomerById(custId)
+    .then((customer) => {
+      const currentBalance = customer.account_balance
+      const newBalance = currentBalance + amount
+      return newBalance
+    })
+    .then((newBalance) => {
+      return exportsObj.updateCustomer(custId, { account_balance: newBalance })
+        .then((customer) => {
+          const currentBalance = customer.account_balance
+          return { success: currentBalance === newBalance }
+        })
+    })
 }
 
 module.exports = exportsObj
