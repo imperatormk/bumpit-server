@@ -9,16 +9,6 @@ module.exports = {
       }], {})
   
   	  const users = queryInterface.bulkInsert('users', [{
-      	username: 'imperatormk',
-        password: '$2b$12$Q3lLMkZoMhEMg03a7deHBeksDQwB8k1rllH83zA7vyG7Ue7Y6g5ry',
-        location: 'Macedonia',
-        bio: 'Coder?',
-        email: 'darko.simonovski@hotmail.com',
-        phone: '076-314-010',
-        stripeCustId: 'cus_F7h2ocdiAVzL0B', // subject of change?
-        createdAt: Sequelize.fn('NOW'), // temp
-        updatedAt: Sequelize.fn('NOW') // temp
-      }, {
       	username: 'mr.mach',
         password: '$2y$12$bJebJvoEk3YdbskBW7KuoePMgfGqQAh6TXfz1tdDamNZQLBJYxb6W',
         location: 'Macedonia',
@@ -26,6 +16,16 @@ module.exports = {
         email: 'mr.mach@gmail.com',
         phone: '069-320-420',
         stripeCustId: 'cus_F7oP9ZWmkeB9S2', // subject of change?
+        createdAt: Sequelize.fn('NOW'), // temp
+        updatedAt: Sequelize.fn('NOW') // temp
+      }, {
+      	username: 'imperatormk',
+        password: '$2b$12$Q3lLMkZoMhEMg03a7deHBeksDQwB8k1rllH83zA7vyG7Ue7Y6g5ry',
+        location: 'Macedonia',
+        bio: 'Coder?',
+        email: 'darko.simonovski@hotmail.com',
+        phone: '076-314-010',
+        stripeCustId: 'cus_F7h2ocdiAVzL0B', // subject of change?
         createdAt: Sequelize.fn('NOW'), // temp
         updatedAt: Sequelize.fn('NOW') // temp
       }], {})
