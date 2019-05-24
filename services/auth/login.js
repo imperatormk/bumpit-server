@@ -10,7 +10,7 @@ const loginFn = (req, res, next) => {
     if (info) return next(err)
     return req.logIn(user, (err) => {
       if (err) return next(err)
-      return db.users.getUserAuth({ username: user.username })
+      return db.users.getUser(user)
         .then((user) => {
           const token = jwt.sign({ username: user.username }, jwtSecret.secret)
           return res.send({ token })

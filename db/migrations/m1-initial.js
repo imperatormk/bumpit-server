@@ -8,7 +8,8 @@ const categories = (Sequelize) => ({
     type: Sequelize.INTEGER
   },
   name: {
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
+    allowNull: false
   }
 })
 
@@ -29,10 +30,12 @@ const users = (Sequelize) => ({
     allowNull: false
   },
   location: {
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
+    defaultValue: ''
   },
   bio: {
-    type: Sequelize.TEXT
+    type: Sequelize.TEXT,
+    defaultValue: ''
   },
   email: {
     type: Sequelize.STRING,
@@ -40,7 +43,8 @@ const users = (Sequelize) => ({
     unique: true
   },
   phone: {
-    type: Sequelize.STRING
+    type: Sequelize.STRING,
+    defaultValue: ''
   },
   createdAt: {
     type: Sequelize.DATE,
@@ -285,8 +289,7 @@ const shippings = (Sequelize) => ({
     allowNull: false
   },
   trackingNo: {
-    type: Sequelize.STRING,
-    allowNull: true
+    type: Sequelize.STRING
   },
   status: {
     type: Sequelize.STRING,

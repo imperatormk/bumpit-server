@@ -15,7 +15,6 @@ module.exports = (sequelize, DataTypes) => {
           const rating = reviews.map(val => val.rating).reduce((acc, val) => acc + val) / reviews.length
           return rating
         }
-        return null
       }
     }
   }, {

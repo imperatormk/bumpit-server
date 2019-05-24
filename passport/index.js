@@ -13,7 +13,7 @@ passport.use('login', new LocalStrategy({
   passwordField: 'password',
   session: false
 }, (username, password, next) => {
-  return db.users.getUserAuth({ username })
+  return db.users.getUser({ username }, true)
     .then((user) => {
       if (!user) return next(null, false, { status: 401, msg: 'badUsername' })
       return bcrypt.compare(password, user.password)
@@ -31,7 +31,7 @@ const opts = {
 }
 
 passport.use('jwt', new JwtStrategy(opts, (jwtPayload, next) => {
-  return db.users.getUserAuth({ username: jwtPayload.username })
+  return db.users.getUser({ username: jwtPayload.username })
     .then((user) => {
       if (user) { next(null, user) }
       else { next(null, false) }

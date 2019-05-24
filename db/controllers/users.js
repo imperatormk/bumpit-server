@@ -2,24 +2,55 @@ const exportsObj = {}
 
 const User = require('../models').user
 
+const addExcludes = (options = {}, excludes = ['password']) => {
+	if (!options.attributes) options.attributes = {}
+	const currentExcludes = options.attributes.exclude || []
+	options.attributes.exclude = [...new Set([...currentExcludes, ...excludes])]
+	return Promise.resolve(options)
+}
+
 exportsObj.getUsers = () => {
-	return User.findAll()
+	return addExcludes()
+		.then(options => User.findAll(options))
 }
 
-exportsObj.getUser = (userId) => {
-	return User.findOne({ where: { id: userId } })
+exportsObj.getUserById = (userId) => {
+	const options = {
+		where: { id: userId }
+	}
+	return addExcludes(options)
+		.then(options => User.findOne(options))
 }
 
-exportsObj.getUserAuth = (userDetails) => {
-	return User.findOne({ where: userDetails })
+exportsObj.getUser = (user, includePassword = false) => {
+	const options = {
+		where: user
+	}
+	const excludesFn = () => { if (includePassword) return [] }
+
+	return addExcludes(options, excludes())
+		.then(options => User.findOne(options))
 }
 
 exportsObj.insertUser = (user) => {
-	return User.create(user)
+	return User
+		.create(user)
+		.then(user => exportsObj.getUserById(user.id))
+}
+
+exportsObj.updateUser = (user) => {
+	const options = {
+		where: { id: user.id }
+	}
+	return addExcludes(options)
+		.then(options => User.update(user, options))
 }
 
 exportsObj.deleteUser = (userId) => {
-	return User.destroy({ where: { id: userId } })
+	const options = {
+		where: { id: userId }
+	}
+	return User.destroy(options)
 	  .then(() => ({ id: userId }))
 }
 
