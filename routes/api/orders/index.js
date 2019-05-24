@@ -31,7 +31,7 @@ router.post('/', authMiddleware, function(req, res, next) { // here charge event
       if (product.status !== 'AVAILABLE') return next({ status: 400, msg: 'productUnavailable' })
       const orderObj = {
         usrId: userId,
-        itmId: productId,
+        proId: productId,
         status: 'PROCESSING'
       }
       const chargeObj = {

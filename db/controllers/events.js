@@ -2,8 +2,8 @@ const exportsObj = {}
 
 const Event = require('../models').event
 
-exportsObj.getEventsForProduct = (itmId) => {
-	return Event.findAll({ where: { itmId } })
+exportsObj.getEventsForProduct = (proId) => {
+	return Event.findAll({ where: { proId } })
 }
 
 exportsObj.getEvent = (evtId) => {

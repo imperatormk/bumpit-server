@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
   const Like = sequelize.define('like', {})
   Like.associate = function(models) {
     Like.belongsTo(models.product, {
-      foreignKey: 'itmId',
+      foreignKey: 'proId',
       as: 'product'
     })
     Like.belongsTo(models.user, {

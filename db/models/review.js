@@ -6,7 +6,7 @@ module.exports = (sequelize, DataTypes) => {
   })
   Review.associate = function(models) {
     Review.belongsTo(models.product, {
-      foreignKey: 'itmId',
+      foreignKey: 'proId',
       as: 'product'
     })
     Review.belongsTo(models.user, {

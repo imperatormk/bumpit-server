@@ -134,13 +134,13 @@ const images = (Sequelize) => ({
     primaryKey: true,
     type: Sequelize.INTEGER
   },
-  itmId: {
+  proId: {
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
       model: 'products',
       key: 'id',
-      as: 'itmId'
+      as: 'proId'
     },
     allowNull: false
   },
@@ -172,13 +172,13 @@ const reviews = (Sequelize) => ({
     allowNull: false,
     unique: 'reviewUnique'
   },
-  itmId: {
+  proId: {
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
       model: 'products',
       key: 'id',
-      as: 'itmId'
+      as: 'proId'
     },
     allowNull: false,
     unique: 'reviewUnique'
@@ -219,13 +219,13 @@ const likes = (Sequelize) => ({
     allowNull: false,
     unique: 'likeUnique'
   },
-  itmId: {
+  proId: {
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
       model: 'products',
       key: 'id',
-      as: 'itmId'
+      as: 'proId'
     },
     allowNull: false,
     unique: 'likeUnique'
@@ -261,13 +261,13 @@ const orders = (Sequelize) => ({
     },
     allowNull: false
   },
-  itmId: {
+  proId: {
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
       model: 'products',
       key: 'id',
-      as: 'itmId'
+      as: 'proId'
     },
     allowNull: false
   },
@@ -517,8 +517,8 @@ module.exports = {
                       const refundsP = queryInterface.createTable('refunds', refunds(Sequelize))
                       return Promise.all([refundsP])
                         .then(() => {
-                          const reviewsU = addUnique(queryInterface, 'reviews', ['itmId', 'usrId'])
-                          const likesU = addUnique(queryInterface, 'likes', ['itmId', 'usrId'])
+                          const reviewsU = addUnique(queryInterface, 'reviews', ['proId', 'usrId'])
+                          const likesU = addUnique(queryInterface, 'likes', ['proId', 'usrId'])
                           const eventsU = addUnique(queryInterface, 'events', ['type', 'ordId'])
                           const chargesU = addUnique(queryInterface, 'charges', ['txnId'])
                           const refundsU = addUnique(queryInterface, 'refunds', ['refId'])

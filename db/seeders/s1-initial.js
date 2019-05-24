@@ -83,26 +83,26 @@ module.exports = {
 
       	return Promise.all([products, connections]).then(() => {
       	  const images = queryInterface.bulkInsert('images', [{
-            itmId: 1,
+            proId: 1,
             url: 'https://via.placeholder.com/500x300',
           }, {
-            itmId: 2,
+            proId: 2,
             url: 'https://via.placeholder.com/400x600',
           }, {
-            itmId: 3,
+            proId: 3,
             url: 'https://via.placeholder.com/400x400',
           }], {})
           
           const reviews = queryInterface.bulkInsert('reviews', [{
             usrId: 1,
-            itmId: 1,
+            proId: 1,
             rating: 2,
             message: 'Not very well kept',
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp
           }, {
             usrId: 2,
-            itmId: 2,
+            proId: 2,
             rating: 3,
             message: 'Not bad for a single shoe',
             createdAt: Sequelize.fn('NOW'), // temp
@@ -111,20 +111,20 @@ module.exports = {
 
           const likes = queryInterface.bulkInsert('likes', [{
             usrId: 1,
-            itmId: 2,
+            proId: 2,
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp
           }], {})
 
           const orders = queryInterface.bulkInsert('orders', [{
             usrId: 1,
-            itmId: 1,
+            proId: 1,
             status: 'PROCESSING',
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp
           }, {
             usrId: 1,
-            itmId: 3,
+            proId: 3,
             status: 'PROCESSING',
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp
