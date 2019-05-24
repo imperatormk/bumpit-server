@@ -6,6 +6,7 @@ const addExcludes = (options = {}, excludes = ['password']) => {
 	if (!options.attributes) options.attributes = {}
 	const currentExcludes = options.attributes.exclude || []
 	options.attributes.exclude = [...new Set([...currentExcludes, ...excludes])]
+
 	return Promise.resolve(options)
 }
 
@@ -26,9 +27,8 @@ exportsObj.getUser = (user, includePassword = false) => {
 	const options = {
 		where: user
 	}
-	const excludesFn = () => { if (includePassword) return [] }
-
-	return addExcludes(options, excludes())
+	const extraExcludes = includePassword ? [] : ['password']
+	return addExcludes(options, extraExcludes)
 		.then(options => User.findOne(options))
 }
 

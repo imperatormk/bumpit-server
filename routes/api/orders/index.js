@@ -3,7 +3,7 @@ const router = require('express').Router()
 const authMiddleware = require(__basedir + '/services/auth').middleware
 const db = require(__basedir + '/db/controllers')
 
-const paymentsService = require(__basedir + '/services/payments')
+const chargesService = require(__basedir + '/services/payments').charges
 const eventsService = require(__basedir + '/services/events')
 
 router.get('/:id', function(req, res, next) {
@@ -43,7 +43,7 @@ router.post('/', authMiddleware, function(req, res, next) { // here charge event
       // TODO: this HAS to be transactional
       return db.orders.insertOrder(orderObj) // TODO: send mails here
         .then((orderRes) => {
-          return paymentsService.createCharge(chargeObj, orderRes.id)
+          return chargesService.createCharge(chargeObj, orderRes.id)
             .then((chargeRes) => ({ order: orderRes, charge: chargeRes }))
         })
         .then((resData) => {
@@ -106,7 +106,7 @@ router.post('/:id/complete', (req, res, next) => {
       const validStatuses = ['IN_TRANSIT', 'IN_DISPUTE']
       if (!validStatuses.includes(order.status)) return next({ status: 400, msg: 'orderNotCompleteable' })
 
-      return paymentsService.releaseFunds(orderId)
+      return chargesService.releaseFunds(orderId)
         .then(() => {
           const event = {
             type: 'COMPLETION',
@@ -134,7 +134,7 @@ router.post('/:id/refund', (req, res, next) => {
     .then((order) => {
       if (order.status === 'COMPLETED') return next({ status: 400, msg: 'orderNotRefundable' })
 
-      return paymentsService.refundOrder(orderId, refundAmount)
+      return chargesService.refundOrder(orderId, refundAmount)
         .then((refund) => {
           const product = order.product
           return db.products.updateProduct({ ...product, status: 'AVAILABLE' })
