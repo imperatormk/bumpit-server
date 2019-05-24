@@ -1,5 +1,5 @@
-const express = require('express')
-const router = express.Router()
+const router = require('express').Router()
+
 const db = require(__basedir + '/db/controllers')
 
 router.get('/', function(req, res) {
