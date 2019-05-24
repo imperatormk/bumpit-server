@@ -2,32 +2,51 @@ const exportsObj = {}
 const db = require(__basedir + '/db/controllers')
 const stripe = require('./provider')
 
-const createCharge = (charge, orderId) => {
-  if (!charge || !orderId) return Promise.reject({ msg: 'invalidCharge' })
-  return stripe.charges.create(charge)
-    .then((chargeRes) => db.charges.insertCharge({
-      txnId: chargeRes.id,
-      amount: chargeRes.amount,
-      amountRefunded: chargeRes.amount_refunded,
-      currency: chargeRes.currency,
-      status: 'ESCROW', // TODO: maybe we should also utilize the stripe status
+exportsObj.createCharge = (chargeObj, orderId) => {
+  return stripe.charges.create(chargeObj)
+    .then((chargeObj) => db.charges.insertCharge({
+      txnId: chargeObj.id,
+      amount: chargeObj.amount,
+      amountRefunded: chargeObj.amount_refunded,
+      currency: chargeObj.currency,
+      stage: 'ESCROW',
+      status: chargeObj.status,
       ordId: orderId
     }))
-    .then((chargeRes) => ({ id: chargeRes.id }))
 }
 
-const releaseFunds = (orderId) => {
-  if (!orderId) return Promise.reject({ msg: 'invalidOrder' })
-
-  const getCharge = db.charges.getCharge({ ordId: orderId })
-  return Promise.all(getCharge)
+exportsObj.releaseFunds = (orderId) => {
+  return db.charges.getCharge({ ordId: orderId })
     .then((charge) => {
       if (charge.status === 'RELEASED') return Promise.reject({ msg: 'paymentAlreadyReleased' })
-      return db.charges.modifyCharge({ id: charge.id, status: 'RELEASED' })
+      return db.charges.updateCharge({ id: charge.id, status: 'RELEASED' })
     })
-} 
+}
 
-exportsObj.createCharge = createCharge
-exportsObj.releaseFunds = releaseFunds
+exportsObj.refundOrder = (orderId, amount) => {
+  return db.charges.getCharge({ ordId: orderId })
+    .then((charge) => {
+      const amountProc = amount > 0 ? amount : charge.amount
+      const refundObj = {
+        charge: charge.txnId,
+        amount: amountProc
+      }
+      return stripe.refunds.create(refundObj)
+        .then((refund) => db.refunds.insertRefund({
+          refId: refund.id,
+          chgId: charge.id,
+          amount: refund.amount,
+          currency: refund.currency,
+          status: refund.status
+        }))
+        .then(refund => ({ refund, charge }))
+    })
+    .then((result) => {
+      const chargeId = result.charge.id
+      const amountRefunded = result.refund.amount
+      return db.charges.updateCharge({ id: chargeId, stage: 'REFUNDED', amountRefunded })
+        .then(() => result.refund)
+    })
+}
 
 module.exports = exportsObj

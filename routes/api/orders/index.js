@@ -47,7 +47,7 @@ router.post('/', authMiddleware, function(req, res) { // here charge event is cr
             .then((chargeRes) => ({ order: orderRes, charge: chargeRes }))
         })
         .then((resData) => {
-          return db.items.modifyItem({ ...item, status: 'SOLD' })
+          return db.items.updateItem({ ...item, status: 'SOLD' })
             .then(() => resData)
         })
         .then((resData) => {
@@ -67,8 +67,8 @@ router.post('/', authMiddleware, function(req, res) { // here charge event is cr
 })
 
 router.post('/:id/ship', (req, res) => {
-  const shipping = req.body
   const orderId = req.params.id
+  const shipping = req.body
 
   return db.orders.getOrderById(orderId) // DRY!
     .then((order) => {
@@ -111,6 +111,39 @@ router.post('/:id/complete', (req, res) => {
           const event = {
             type: 'COMPLETION',
             entryId: -1, // TODO: think about a model here
+            ordId: orderId
+          }
+          return eventsService.createEvent(event)
+        })
+        .then(() => res.send({ success: true }))
+    })
+    .catch(err => res.status(err.status || err.statusCode || 500).send({ msg: err.msg || err.message || err || 'unknownError' })) // DRY
+})
+
+router.post('/:id/refund', (req, res) => {
+  const orderId = req.params.id
+  const refund = req.body
+  const refundAmount = refund.amount || null
+
+  return db.orders.getOrderById(orderId) // DRY!
+    .then((order) => {
+      if (!order) throw ({ status: 400, msg: 'badOrder' })
+      if (refundAmount != null && (refundAmount > order.price || refundAmount <= 0)) throw ({ status: 400, msg: 'invalidRefund' })
+      return order.toJSON()
+    })
+    .then((order) => {
+      if (order.status === 'COMPLETED') return res.status(400).send({ msg: 'orderNotRefundable' })
+
+      return paymentsService.refundOrder(orderId, refundAmount)
+        .then((refund) => {
+          const item = order.item
+          return db.items.updateItem({ ...item, status: 'AVAILABLE' })
+            .then(() => refund)
+        })
+        .then((refund) => {
+          const event = {
+            type: 'REFUND',
+            entryId: refund.id,
             ordId: orderId
           }
           return eventsService.createEvent(event)
