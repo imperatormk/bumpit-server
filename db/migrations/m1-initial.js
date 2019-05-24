@@ -29,8 +29,7 @@ const users = (Sequelize) => ({
     allowNull: false
   },
   location: {
-    type: Sequelize.STRING,
-    allowNull: false
+    type: Sequelize.STRING
   },
   bio: {
     type: Sequelize.TEXT
