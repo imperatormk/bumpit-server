@@ -160,6 +160,11 @@ router.post('/:id/refund', (req, res, next) => {
 
 router.post('/:id/claim', (req, res, next) => { // not the best endpoint?
   const orderId = req.params.id
+  const { method } = req.body
+
+  const availableMethods = ['balance', 'bankAccount']
+  if (!availableMethods.includes(method))
+    return next({ status: 400, msg: 'invalidClaimMethod' })
 
   return db.orders.getOrderById(orderId) // DRY!
     .then((order) => {
@@ -171,7 +176,8 @@ router.post('/:id/claim', (req, res, next) => { // not the best endpoint?
       const allowedStatuses = ['COMPLETED', 'REFUNDED']
       if (!allowedStatuses.includes(order.status)) 
         return next({ status: 400, msg: 'orderStillPending' })
-      return chargesService.claimFunds(orderId)
+
+      return chargesService.claimFunds(orderId, method)
         .then(result => res.send(result))
     })
     .catch(err => next(err))

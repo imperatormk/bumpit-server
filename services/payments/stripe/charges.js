@@ -21,6 +21,10 @@ const moveToAccountBalance = (custId, amount) => {
   return customersController.updateCustomerBalanceBy(custId, amount)
 }
 
+const sendToBankAccount = (custId, amount) => {
+  return Promise.reject({ status: 415, msg: 'notImplemented' })
+}
+
 exportsObj.releaseFunds = (orderId) => {
   return db.charges.getCharge({ ordId: orderId })
     .then((charge) => {
@@ -32,9 +36,14 @@ exportsObj.releaseFunds = (orderId) => {
     })
 }
 
-exportsObj.claimFunds = (orderId) => {
+exportsObj.claimFunds = (orderId, method) => {
   const getOrder = db.orders.getOrderById(orderId)
   const getCharge = db.charges.getCharge({ ordId: orderId })
+
+  const availableActions = {
+    balance: moveToAccountBalance,
+    bankAccount: sendToBankAccount
+  }
 
   return Promise.all([getOrder, getCharge])
     .then(([order, charge]) => {
@@ -64,7 +73,8 @@ exportsObj.claimFunds = (orderId) => {
       if (!(data.custId && data.amount && data.nextStage))
         return Promise.reject({ status: 500, msg: 'paymentClaimFailed' })
 
-      return moveToAccountBalance(data.custId, data.amount)
+      const methodAction = availableActions[method]
+      return methodAction(data.custId, data.amount)
         .then((result) => {
           if (!result)
             return Promise.reject({ status: 500, msg: 'paymentClaimFailed' })
