@@ -43,6 +43,18 @@ module.exports = {
           updatedAt: Sequelize.fn('NOW') // temp
         }, {
           catId: 2,
+          selId: 1,
+          title: 'A super shoe',
+          details: 'This equals two',
+          condition: 1,
+          price: 589,
+          currency: 'AUD',
+          size: 'Test size C',
+          location: 'SS Home',
+          createdAt: Sequelize.fn('NOW'), // temp
+          updatedAt: Sequelize.fn('NOW') // temp
+        }, {
+          catId: 2,
           selId: 2,
           title: 'A shoe',
           details: 'Just one though',
@@ -74,6 +86,9 @@ module.exports = {
           }, {
             itmId: 2,
             url: 'https://via.placeholder.com/400x600',
+          }, {
+            itmId: 3,
+            url: 'https://via.placeholder.com/400x400',
           }], {})
           
           const reviews = queryInterface.bulkInsert('reviews', [{
@@ -107,7 +122,7 @@ module.exports = {
             updatedAt: Sequelize.fn('NOW') // temp
           }, {
             usrId: 1,
-            itmId: 2,
+            itmId: 3,
             status: 'PROCESSING',
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp

@@ -27,7 +27,7 @@ const createEvent = (event) => {
     .then(() => {
       const nextState = moveToNextState(event.type)
       const orderId = event.ordId
-      return db.orders.modifyOrder({ status: nextState, id: orderId })
+      return db.orders.updateOrder({ status: nextState, id: orderId })
     })
 }
 

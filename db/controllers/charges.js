@@ -7,18 +7,18 @@ exportsObj.getCharges = () => {
 }
 
 exportsObj.getChargeById = (chgId) => {
-	return Charge.findOne({ id: chgId })
+	return Charge.findOne({ where: { id: chgId } })
 }
 
 exportsObj.getCharge = (charge) => {
-	return Charge.findOne(charge)
+	return Charge.findOne({ where: charge })
 }
 
 exportsObj.insertCharge = (charge) => {
 	return Charge.create(charge)
 }
 
-exportsObj.modifyCharge = (charge) => {
+exportsObj.updateCharge = (charge) => {
 	return Charge.update(charge, { where: { id: charge.id } })
 }
 

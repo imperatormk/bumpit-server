@@ -33,7 +33,7 @@ exportsObj.insertOrder = (order) => {
 	return Order.create(order)
 }
 
-exportsObj.modifyOrder = (order) => {
+exportsObj.updateOrder = (order) => {
 	return Order.update(order, { where: { id: order.id } })
 }
 

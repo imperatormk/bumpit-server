@@ -34,7 +34,7 @@ exportsObj.insertItem = (item) => {
 	return Item.create(item)
 }
 
-exportsObj.modifyItem = (item) => {
+exportsObj.updateItem = (item) => {
 	return Item.update(item, { where: { id: item.id } })
 }
 
