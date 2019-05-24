@@ -19,12 +19,10 @@ const createCharge = (charge, orderId) => {
 const releaseFunds = (orderId) => {
   if (!orderId) return Promise.reject({ msg: 'invalidOrder' })
 
-  const getOrder = db.orders.getOrderById(orderId)
   const getCharge = db.charges.getCharge({ ordId: orderId })
-
-  return Promise.all([getOrder, getCharge])
-    .then(([order, charge]) => {
-      if (order.status === 'RELEASED') return Promise.reject({ msg: 'paymentAlreadyReleased' })
+  return Promise.all(getCharge)
+    .then((charge) => {
+      if (charge.status === 'RELEASED') return Promise.reject({ msg: 'paymentAlreadyReleased' })
       return db.charges.modifyCharge({ id: charge.id, status: 'RELEASED' })
     })
 } 
