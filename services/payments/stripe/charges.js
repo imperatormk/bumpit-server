@@ -36,7 +36,7 @@ exportsObj.releaseFunds = (orderId) => {
     })
 }
 
-exportsObj.claimFunds = (orderId, method) => {
+exportsObj.payoutFunds = (orderId, method) => {
   const getOrder = db.orders.getOrderById(orderId)
   const getCharge = db.charges.getCharge({ ordId: orderId })
 
@@ -49,7 +49,7 @@ exportsObj.claimFunds = (orderId, method) => {
     .then(([order, charge]) => {
       const allowedStates = ['RELEASED_HOLD', 'REFUNDED_HOLD']
       if (!allowedStates.includes(charge.stage))
-        return Promise.reject({ status: 400, msg: 'paymentNotClaimable' })
+        return Promise.reject({ status: 400, msg: 'unableToPayoutFunds' })
 
       const buyer = order.buyer
       const seller = order.product.seller
@@ -71,13 +71,13 @@ exportsObj.claimFunds = (orderId, method) => {
       }
 
       if (!(data.custId && data.amount && data.nextStage))
-        return Promise.reject({ status: 500, msg: 'paymentClaimFailed' })
+        return Promise.reject({ status: 500, msg: 'fundsPayoutFailed' })
 
       const methodAction = availableActions[method]
       return methodAction(data.custId, data.amount)
         .then((result) => {
           if (!result)
-            return Promise.reject({ status: 500, msg: 'paymentClaimFailed' })
+            return Promise.reject({ status: 500, msg: 'fundsPayoutFailed' })
           return db.charges.updateCharge({ id: charge.id, stage: data.nextStage })
             .then(() => ({ success: true }))
         })
