@@ -1,9 +1,8 @@
 const exportsObj = {}
 
-const bcrypt = require('bcrypt')
-const BCRYPT_SALT_ROUNDS = 12
-
 const db = require(__basedir + '/db/controllers')
+const customersService = require(__basedir + '/services/payments').customers
+const helper = require('./helper')
 
 const sanitizeUser = (user) => {
   const passwordFields = ['password', 'confirmPassword']
@@ -28,15 +27,15 @@ const sanitizeUser = (user) => {
   return { user: sanitizedUser }
 }
 
-const checkExistingValues = (user) => {
-  const existingValues = ['username', 'email'].map((field) => {
+const checkDuplicateValues = (user) => {
+  const duplicateValues = ['username', 'email'].map((field) => {
     const criteria = {}
     criteria[field] = user[field]
     return db.users.getUser(criteria)
       .then(result => ({ exists: !!result, field }))
   })
-  return Promise.all(existingValues)
-    .then(results => results
+  return Promise.all(duplicateValues)
+    .then((results) => results
       .filter(result => result.exists)
       .map(result => result.field))
 }
@@ -47,12 +46,15 @@ exportsObj.register = (user) => {
   if (sanitizationResult.badFields) return Promise.reject({ status: 400, msg: 'invalidFields', details: sanitizedUser.badFields })
 
   const sanitizedUser = sanitizationResult.user
-  return checkExistingValues(sanitizedUser)
-    .then((existingValues) => {
-      if (existingValues.length) return Promise.reject({ status: 409, msg: 'existingFields', details: existingValues })
-      return bcrypt.hash(sanitizedUser.password, BCRYPT_SALT_ROUNDS)
-        .then(hashedPassword => db.users.insertUser({ ...sanitizedUser, password: hashedPassword }))
-        .then(user => user.toJSON())
+  return checkDuplicateValues(sanitizedUser)
+    .then((duplicateValues) => {
+      if (duplicateValues.length) return Promise.reject({ status: 409, msg: 'duplicateFields', details: duplicateValues })
+      return helper.hashPassword(sanitizedUser.password)
+        .then(hashedPassword => ({ ...user, password: hashedPassword }))
+        .then(user => customersService.createCustomerIfNotExists(user, 'email')
+          .then(stripeCustomer => ({ ...user, stripeCustId: stripeCustomer.id }))
+        )
+        .then(user => db.users.insertUser(user))
     })
 }
 
