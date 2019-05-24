@@ -4,9 +4,9 @@ module.exports = (sequelize, DataTypes) => {
     status: DataTypes.STRING,
   })
   Order.associate = function(models) {
-    Order.belongsTo(models.item, {
+    Order.belongsTo(models.product, {
       foreignKey: 'itmId',
-      as: 'item'
+      as: 'product'
     })
     Order.belongsTo(models.user, {
       foreignKey: 'usrId',

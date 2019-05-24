@@ -53,7 +53,7 @@ const users = (Sequelize) => ({
   }
 })
 
-const items = (Sequelize) => ({
+const products = (Sequelize) => ({
   id: {
     allowNull: false,
     autoIncrement: true,
@@ -131,7 +131,7 @@ const images = (Sequelize) => ({
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
-      model: 'items',
+      model: 'products',
       key: 'id',
       as: 'itmId'
     },
@@ -169,7 +169,7 @@ const reviews = (Sequelize) => ({
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
-      model: 'items',
+      model: 'products',
       key: 'id',
       as: 'itmId'
     },
@@ -216,7 +216,7 @@ const likes = (Sequelize) => ({
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
-      model: 'items',
+      model: 'products',
       key: 'id',
       as: 'itmId'
     },
@@ -258,7 +258,7 @@ const orders = (Sequelize) => ({
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
-      model: 'items',
+      model: 'products',
       key: 'id',
       as: 'itmId'
     },
@@ -493,9 +493,9 @@ module.exports = {
       const usersP = queryInterface.createTable('users', users(Sequelize))
       return Promise.all([categoriesP, usersP])
         .then(() => {
-          const itemsP = queryInterface.createTable('items', items(Sequelize))
+          const productsP = queryInterface.createTable('products', products(Sequelize))
           const connectionsP = queryInterface.createTable('connections', connections(Sequelize))
-          return Promise.all([itemsP, connectionsP])
+          return Promise.all([productsP, connectionsP])
             .then(() => {
               const imagesP = queryInterface.createTable('images', images(Sequelize))
               const reviewsP = queryInterface.createTable('reviews', reviews(Sequelize))
@@ -540,9 +540,9 @@ module.exports = {
               const ordersP = queryInterface.dropTable('orders')
               return Promise.all([imagesP, reviewsP, likesP, ordersP])
                 .then(() => {
-                  const itemsP = queryInterface.dropTable('items')
+                  const productsP = queryInterface.dropTable('products')
                   const connectionsP = queryInterface.dropTable('connections')
-                  return Promise.all([itemsP, connectionsP])
+                  return Promise.all([productsP, connectionsP])
                     .then(() => {
                       const categoriesP = queryInterface.dropTable('categories')
                       const usersP = queryInterface.dropTable('users')

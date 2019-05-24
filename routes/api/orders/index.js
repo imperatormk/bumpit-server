@@ -9,36 +9,36 @@ const eventsService = require(__basedir + '/services/events')
 router.get('/:id', function(req, res, next) {
   const id = req.params.id
   return db.orders.getOrderById(id)
-    .then((item) => {
-      if (!item) return next({ status: 404, msg: 'notFound' })
-      return res.send(item)
+    .then((product) => {
+      if (!product) return next({ status: 404, msg: 'notFound' })
+      return res.send(product)
     })
     .catch(err => next(err))
 })
 
 router.post('/', authMiddleware, function(req, res, next) { // here charge event is created
   const order = req.body
-  const itemId = order.itemId
+  const productId = order.productId
   const paymentToken = order.paymentToken
   const userId = req.user.id
 
-  return db.items.getItem(itemId) // DRY!
-    .then((item) => {
-      if (!item) return next({ status: 400, msg: 'badItem' })
-      return item.toJSON()
+  return db.products.getProduct(productId) // DRY!
+    .then((product) => {
+      if (!product) return next({ status: 400, msg: 'badProduct' })
+      return product.toJSON()
     })
-    .then((item) => {
-      if (item.status !== 'AVAILABLE') return next({ status: 400, msg: 'itemUnavailable' })
+    .then((product) => {
+      if (product.status !== 'AVAILABLE') return next({ status: 400, msg: 'productUnavailable' })
       const orderObj = {
         usrId: userId,
-        itmId: itemId,
+        itmId: productId,
         status: 'PROCESSING'
       }
       const chargeObj = {
-        amount: item.price,
-        currency: item.currency,
+        amount: product.price,
+        currency: product.currency,
         card: paymentToken,
-        description: `Order for item #${itemId}`
+        description: `Order for product #${productId}`
       }
       // TODO: this HAS to be transactional
       return db.orders.insertOrder(orderObj) // TODO: send mails here
@@ -47,7 +47,7 @@ router.post('/', authMiddleware, function(req, res, next) { // here charge event
             .then((chargeRes) => ({ order: orderRes, charge: chargeRes }))
         })
         .then((resData) => {
-          return db.items.updateItem({ ...item, status: 'SOLD' })
+          return db.products.updateProduct({ ...product, status: 'SOLD' })
             .then(() => resData)
         })
         .then((resData) => {
@@ -136,8 +136,8 @@ router.post('/:id/refund', (req, res, next) => {
 
       return paymentsService.refundOrder(orderId, refundAmount)
         .then((refund) => {
-          const item = order.item
-          return db.items.updateItem({ ...item, status: 'AVAILABLE' })
+          const product = order.product
+          return db.products.updateProduct({ ...product, status: 'AVAILABLE' })
             .then(() => refund)
         })
         .then((refund) => {

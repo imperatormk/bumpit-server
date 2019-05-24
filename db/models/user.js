@@ -24,9 +24,9 @@ module.exports = (sequelize, DataTypes) => {
     }
   })
   User.associate = function(models) {
-    User.hasMany(models.item, {
+    User.hasMany(models.product, {
       foreignKey: 'selId',
-      as: 'items'
+      as: 'products'
     })
     User.hasMany(models.review, {
       foreignKey: 'usrId',

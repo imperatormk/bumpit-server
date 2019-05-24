@@ -29,7 +29,7 @@ module.exports = {
       }], {})
   
   	  return Promise.all([categories, users]).then(() => {
-        const items = queryInterface.bulkInsert('items', [{
+        const products = queryInterface.bulkInsert('products', [{
           catId: 1,
           selId: 1,
           title: 'An underwear',
@@ -79,7 +79,7 @@ module.exports = {
           updatedAt: Sequelize.fn('NOW') // temp
         }], {})
 
-      	return Promise.all([items, connections]).then(() => {
+      	return Promise.all([products, connections]).then(() => {
       	  const images = queryInterface.bulkInsert('images', [{
             itmId: 1,
             url: 'https://via.placeholder.com/500x300',
@@ -181,9 +181,9 @@ module.exports = {
         const users = queryInterface.bulkDelete('users', null, {})
         return Promise.all([categories, users])
           .then(() => {
-          const items = queryInterface.bulkDelete('items', null, {})
+          const products = queryInterface.bulkDelete('products', null, {})
           const connections = queryInterface.bulkDelete('connections', null, {})
-          return Promise.all([items, connections])
+          return Promise.all([products, connections])
             .then(() => {
               const images = queryInterface.bulkDelete('images', null, {})
               const reviews = queryInterface.bulkDelete('reviews', null, {})

@@ -1,6 +1,6 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
-  const Item = sequelize.define('item', {
+  const Product = sequelize.define('product', {
     title: DataTypes.STRING,
     details: DataTypes.TEXT,
     condition: DataTypes.INTEGER,
@@ -10,27 +10,27 @@ module.exports = (sequelize, DataTypes) => {
     location: DataTypes.STRING,
     status: DataTypes.STRING,
   })
-  Item.associate = function(models) {
-    Item.belongsTo(models.category, {
+  Product.associate = function(models) {
+    Product.belongsTo(models.category, {
       foreignKey: 'catId',
       as: 'category'
     })
-    Item.belongsTo(models.user, {
+    Product.belongsTo(models.user, {
       foreignKey: 'selId',
       as: 'seller'
     })
-    Item.hasOne(models.order, {
+    Product.hasOne(models.order, {
       foreignKey: 'itmId',
       as: 'order'
     })
-    Item.hasMany(models.like, {
+    Product.hasMany(models.like, {
       foreignKey: 'itmId',
       as: 'likes'
     })
-    Item.hasMany(models.image, {
+    Product.hasMany(models.image, {
       foreignKey: 'itmId',
       as: 'images'
     })
   }
-  return Item
+  return Product
 }

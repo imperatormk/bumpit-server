@@ -5,9 +5,9 @@ module.exports = (sequelize, DataTypes) => {
     message: DataTypes.TEXT,
   })
   Review.associate = function(models) {
-    Review.belongsTo(models.item, {
+    Review.belongsTo(models.product, {
       foreignKey: 'itmId',
-      as: 'item'
+      as: 'product'
     })
     Review.belongsTo(models.user, {
       foreignKey: 'usrId',
