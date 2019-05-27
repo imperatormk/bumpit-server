@@ -43,7 +43,12 @@ exportsObj.createCustomerIfNotExists = (user, uniqueKey) => {
     .then(customer => customer || createCustomer(user))
 }
 
-exportsObj.updateCustomerBalanceBy = (custId, amount) => {
+exportsObj.getCustomerBalance = (custId) => {
+  return exportsObj.getCustomerById(custId)
+    .then(customer => customer.account_balance)
+}
+
+exportsObj.updateCustomerBalanceBy = (amount, custId) => {
   return exportsObj.getCustomerById(custId)
     .then((customer) => {
       const currentBalance = customer.account_balance
@@ -54,7 +59,8 @@ exportsObj.updateCustomerBalanceBy = (custId, amount) => {
       return exportsObj.updateCustomer(custId, { account_balance: newBalance })
         .then((customer) => {
           const currentBalance = customer.account_balance
-          return { success: currentBalance === newBalance }
+          const status = currentBalance === newBalance ? 'success' : 'error'
+          return { status }
         })
     })
 }

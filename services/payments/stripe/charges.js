@@ -4,26 +4,75 @@ const stripe = require('./provider')
 const db = require(__basedir + '/db/controllers')
 const customersController = require('./customers')
 
-exportsObj.createCharge = (chargeObj, orderId) => {
+exportsObj.chargeAmount = (totalCharge, userId) => {
+  return db.users.findOneById(userId)
+    .then((user) => {
+      const { stripeCustId } = user
+      return getCustomerBalance(stripeCustId)
+    })
+    .then((balance) => {
+      const totalAmount = totalCharge.amount
+      const balanceAmount = (balance > totalAmount) ? totalAmount : balance
+      const bankAmount = totalAmount - balanceAmount
+
+      const willUseBalance = balanceAmount > 0
+      const willUseBank = bankAmount > 0
+
+      const totalResult = {
+        balanceAmount,
+        bankAmount,
+        balanceResult: willUseBalance ? 'PENDING' : 'UNUSED',
+        bankResult: willUseBank ? 'PENDING' : 'UNUSED'
+      }
+
+      const balanceAction = willUseBalance ? 
+        moveFromToAccountBalance(balanceAmount, userId) :
+        Promise.resolve({ flag: true })
+
+      return balanceAction
+        .then((balanceResult) => {
+          const balanceSuccess = balanceResult.flag || balanceResult.status === 'success'
+
+          if (!balanceSuccess) {
+            totalResult.balanceResult = 'FAILURE'
+            return Promise.reject({ status: 400, msg: 'chargeFailed', details: totalResult })
+          }
+          if (!balanceResult.flag) totalResult.balanceResult = 'SUCCESS'
+
+          const bankCharge = { ...totalCharge, amount: bankAmount }
+          const bankAction = willUseBank ?
+            chargeFromBankAccount(bankCharge) :
+            Promise.resolve({ flag: true })
+
+          return bankAction
+            .then((bankResult) => {
+              const bankSuccess = bankResult.flag || bankResult.status === 'succeeded'
+
+              if (!bankSuccess) {
+                totalResult.bankResult = 'FAILURE'
+                return Promise.reject({ status: 400, msg: 'chargeFailed', details: totalResult })
+              }
+              if (!bankResult.flag) totalResult.bankResult = 'SUCCESS'
+              return totalResult
+            })
+        })
+    })
+}
+
+// helpers start, move?
+
+const moveFromToAccountBalance = (custId, amount) => {
+  return customersController.updateCustomerBalanceBy(amount, custId)
+}
+
+const chargeFromBankAccount = (chargeObj) => {
   return stripe.charges.create(chargeObj)
-    .then((chargeObj) => db.charges.insertCharge({
-      txnId: chargeObj.id,
-      amount: chargeObj.amount,
-      amountRefunded: chargeObj.amount_refunded,
-      currency: chargeObj.currency,
-      stage: 'ESCROW',
-      status: chargeObj.status,
-      ordId: orderId
-    }))
 }
-
-const moveToAccountBalance = (custId, amount) => {
-  return customersController.updateCustomerBalanceBy(custId, amount)
-}
-
-const sendToBankAccount = (custId, amount) => {
+const sendToBankAccount = (amount, custId) => {
   return Promise.reject({ status: 415, msg: 'notImplemented' })
 }
+
+// helpers end
 
 exportsObj.releaseFunds = (orderId) => {
   return db.charges.getCharge({ ordId: orderId })
@@ -41,7 +90,7 @@ exportsObj.payoutFunds = (orderId, method) => {
   const getCharge = db.charges.getCharge({ ordId: orderId })
 
   const availableActions = {
-    balance: moveToAccountBalance,
+    balance: moveFromToAccountBalance,
     bankAccount: sendToBankAccount
   }
 
@@ -74,9 +123,9 @@ exportsObj.payoutFunds = (orderId, method) => {
         return Promise.reject({ status: 500, msg: 'fundsPayoutFailed' })
 
       const methodAction = availableActions[method]
-      return methodAction(data.custId, data.amount)
+      return methodAction(data.amount, data.custId)
         .then((result) => {
-          if (!result)
+          if (!result.status === 'success')
             return Promise.reject({ status: 500, msg: 'fundsPayoutFailed' })
           return db.charges.updateCharge({ id: charge.id, stage: data.nextStage })
             .then(() => ({ success: true }))
