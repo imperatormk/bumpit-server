@@ -131,69 +131,24 @@ module.exports = {
           }], {})
 
           return Promise.all([images, reviews, likes, orders])
-            .then(() => {
-              const bankCharges = queryInterface.bulkInsert('bankCharges', [{
-                txnId: 'order1_1',
-                amount: 8500,
-                amountRefunded: 0,
-                currency: 'usd',
-                stage: 'ESCROW',
-                status: 'succeeded',
-                ordId: 1,
-                createdAt: Sequelize.fn('NOW'), // temp
-                updatedAt: Sequelize.fn('NOW') // temp
-              }, {
-                txnId: 'order2_1',
-                amount: 8500,
-                amountRefunded: 8500,
-                currency: 'usd',
-                stage: 'ESCROW',
-                status: 'succeeded',
-                ordId: 2,
-                createdAt: Sequelize.fn('NOW'), // temp
-                updatedAt: Sequelize.fn('NOW') // temp
-              }], {})
-
-              return Promise.all([bankCharges])
-                .then(() => {
-                  const refunds = queryInterface.bulkInsert('refunds', [{
-                    refId: 'refund1_2',
-                    chgId: 2,
-                    amount: 10,
-                    currency: 'usd',
-                    status: 'succeeded'
-                  }, {
-                    refId: 'refund2_2',
-                    chgId: 2,
-                    amount: 20,
-                    currency: 'usd',
-                    status: 'succeeded'
-                  }], {})
-                  return Promise.all([refunds])
-                })
-            })
         })
       })
   },
   down: (queryInterface, Sequelize) => {
-    const bankCharges = queryInterface.bulkDelete('bankCharges', null, {})
-    return Promise.all([bankCharges])
+    const categories = queryInterface.bulkDelete('categories', null, {})
+    const users = queryInterface.bulkDelete('users', null, {})
+    return Promise.all([categories, users])
       .then(() => {
-        const categories = queryInterface.bulkDelete('categories', null, {})
-        const users = queryInterface.bulkDelete('users', null, {})
-        return Promise.all([categories, users])
-          .then(() => {
-          const products = queryInterface.bulkDelete('products', null, {})
-          const connections = queryInterface.bulkDelete('connections', null, {})
-          return Promise.all([products, connections])
-            .then(() => {
-              const images = queryInterface.bulkDelete('images', null, {})
-              const reviews = queryInterface.bulkDelete('reviews', null, {})
-              const likes = queryInterface.bulkDelete('likes', null, {})
-              const orders = queryInterface.bulkDelete('orders', null, {})
-              return Promise.all([images, reviews, likes, orders])
-            })
-          })
+      const products = queryInterface.bulkDelete('products', null, {})
+      const connections = queryInterface.bulkDelete('connections', null, {})
+      return Promise.all([products, connections])
+        .then(() => {
+          const images = queryInterface.bulkDelete('images', null, {})
+          const reviews = queryInterface.bulkDelete('reviews', null, {})
+          const likes = queryInterface.bulkDelete('likes', null, {})
+          const orders = queryInterface.bulkDelete('orders', null, {})
+          return Promise.all([images, reviews, likes, orders])
+        })
       })
   }
 }

@@ -391,34 +391,18 @@ const connections = (Sequelize) => ({
   }
 })
 
-const bankCharges = (Sequelize) => ({
+const charges = (Sequelize) => ({
   id: {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
     type: Sequelize.INTEGER
   },
-  txnId: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
-  amount: {
-    type: Sequelize.INTEGER,
-    allowNull: false
-  },
-  amountRefunded: {
-    type: Sequelize.INTEGER,
-    allowNull: false
-  },
-  currency: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
   stage: {
     type: Sequelize.STRING,
     allowNull: false
   },
-  status: {
+  currency: {
     type: Sequelize.STRING,
     allowNull: false
   },
@@ -449,16 +433,43 @@ const refunds = (Sequelize) => ({
     primaryKey: true,
     type: Sequelize.INTEGER
   },
-  refId: {
+  status: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  ordId: {
+    type: Sequelize.INTEGER,
+    onDelete: 'CASCADE',
+    references: {
+      model: 'orders',
+      key: 'id',
+      as: 'ordId'
+    },
+    allowNull: false
+  },
+  createdAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW // bad
+  },
+  updatedAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW // bad
+  }
+})
+
+const bankCharges = (Sequelize) => ({
+  id: {
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+    type: Sequelize.INTEGER
+  },
+  txnId: {
     type: Sequelize.STRING,
     allowNull: false
   },
   amount: {
     type: Sequelize.INTEGER,
-    allowNull: false
-  },
-  currency: {
-    type: Sequelize.STRING,
     allowNull: false
   },
   status: {
@@ -469,9 +480,44 @@ const refunds = (Sequelize) => ({
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
-      model: 'bankCharges',
+      model: 'charges',
       key: 'id',
       as: 'chgId'
+    },
+    allowNull: false
+  },
+  createdAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW // bad
+  },
+  updatedAt: {
+    type: Sequelize.DATE,
+    defaultValue: Sequelize.NOW // bad
+  }
+})
+
+const bankRefunds = (Sequelize) => ({
+  id: {
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+    type: Sequelize.INTEGER
+  },
+  txnId: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  status: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  refId: {
+    type: Sequelize.INTEGER,
+    onDelete: 'CASCADE',
+    references: {
+      model: 'refunds',
+      key: 'id',
+      as: 'refId'
     },
     allowNull: false
   },
@@ -500,25 +546,9 @@ const balanceActions = (Sequelize) => ({
     type: Sequelize.INTEGER,
     allowNull: false
   },
-  ordId: {
+  entryId: {
     type: Sequelize.INTEGER,
-    onDelete: 'CASCADE',
-    references: {
-      model: 'orders',
-      key: 'id',
-      as: 'ordId'
-    },
-    allowNull: true
-  },
-  refId: {
-    type: Sequelize.INTEGER,
-    onDelete: 'CASCADE',
-    references: {
-      model: 'refunds',
-      key: 'id',
-      as: 'refId'
-    },
-    allowNull: true
+    allowNull: false
   },
   createdAt: {
     type: Sequelize.DATE,
@@ -555,23 +585,22 @@ module.exports = {
               return Promise.all([imagesP, reviewsP, likesP, ordersP])
                 .then(() => {
                   const eventsP = queryInterface.createTable('events', events(Sequelize))
-                  const bankChargesP = queryInterface.createTable('bankCharges', bankCharges(Sequelize))
                   const shippingsP = queryInterface.createTable('shippings', shippings(Sequelize))
-                  return Promise.all([eventsP, bankChargesP, shippingsP])
+                  const chargesP = queryInterface.createTable('charges', charges(Sequelize))
+                  const refundsP = queryInterface.createTable('refunds', refunds(Sequelize))
+                  return Promise.all([eventsP, shippingsP, chargesP, refundsP])
                     .then(() => {
-                      const refundsP = queryInterface.createTable('refunds', refunds(Sequelize))
-                      return Promise.all([refundsP])
+                      const bankChargesP = queryInterface.createTable('bankCharges', bankCharges(Sequelize))
+                      const bankRefundsP = queryInterface.createTable('bankRefunds', bankRefunds(Sequelize))
+                      const balanceActionsP = queryInterface.createTable('balanceActions', balanceActions(Sequelize))
+                      return Promise.all([bankChargesP, bankRefundsP, balanceActionsP])
                         .then(() => {
-                          const balanceActionsP = queryInterface.createTable('balanceActions', balanceActions(Sequelize))
-                          return Promise.all([balanceActionsP])
-                            .then(() => {
-                              const reviewsU = addUnique(queryInterface, 'reviews', ['proId', 'usrId'])
-                              const likesU = addUnique(queryInterface, 'likes', ['proId', 'usrId'])
-                              const eventsU = addUnique(queryInterface, 'events', ['type', 'ordId'])
-                              const bankChargesU = addUnique(queryInterface, 'bankCharges', ['txnId'])
-                              const refundsU = addUnique(queryInterface, 'refunds', ['refId'])
-                              return Promise.all([reviewsU, likesU, eventsU, bankChargesU, refundsU])
-                            })
+                          const reviewsU = addUnique(queryInterface, 'reviews', ['proId', 'usrId'])
+                          const likesU = addUnique(queryInterface, 'likes', ['proId', 'usrId'])
+                          const eventsU = addUnique(queryInterface, 'events', ['type', 'ordId'])
+                          const bankChargesU = addUnique(queryInterface, 'bankCharges', ['txnId'])
+                          const bankRefundsU = addUnique(queryInterface, 'bankRefunds', ['txnId'])
+                          return Promise.all([reviewsU, likesU, eventsU, bankChargesU, bankRefundsU])
                         })
                     })
                 })
@@ -581,35 +610,34 @@ module.exports = {
   },
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction((t) => {
-        const balanceActionsP = queryInterface.dropTable('balanceActions')
-        return Promise.all([balanceActionsP])
-          .then(() => {
-            const refundsP = queryInterface.dropTable('refunds')
-            return Promise.all([refundsP])
-              .then(() => {
-                const eventsP = queryInterface.dropTable('events')
-                const bankChargesP = queryInterface.dropTable('bankCharges')
-                const shippingsP = queryInterface.dropTable('shippings')
-                return Promise.all([bankChargesP, eventsP, shippingsP])
-                  .then(() => {
-                    const imagesP = queryInterface.dropTable('images')
-                    const reviewsP = queryInterface.dropTable('reviews')
-                    const likesP = queryInterface.dropTable('likes')
-                    const ordersP = queryInterface.dropTable('orders')
-                    return Promise.all([imagesP, reviewsP, likesP, ordersP])
-                      .then(() => {
-                        const productsP = queryInterface.dropTable('products')
-                        const connectionsP = queryInterface.dropTable('connections')
-                        return Promise.all([productsP, connectionsP])
-                          .then(() => {
-                            const categoriesP = queryInterface.dropTable('categories')
-                            const usersP = queryInterface.dropTable('users')
-                            return Promise.all([categoriesP, usersP])
-                          })
+      const bankChargesP = queryInterface.dropTable('bankCharges')
+      const bankRefundsP = queryInterface.dropTable('bankRefunds')
+      const balanceActionsP = queryInterface.dropTable('balanceActions')
+      return Promise.all([bankChargesP, bankRefundsP, balanceActionsP])
+        .then(() => {
+          const chargesP = queryInterface.dropTable('charges')
+          const refundsP = queryInterface.dropTable('refunds')
+          const eventsP = queryInterface.dropTable('events')
+          const shippingsP = queryInterface.dropTable('shippings')
+          return Promise.all([chargesP, refundsP, eventsP, shippingsP])
+            .then(() => {
+              const imagesP = queryInterface.dropTable('images')
+              const reviewsP = queryInterface.dropTable('reviews')
+              const likesP = queryInterface.dropTable('likes')
+              const ordersP = queryInterface.dropTable('orders')
+              return Promise.all([imagesP, reviewsP, likesP, ordersP])
+                .then(() => {
+                  const productsP = queryInterface.dropTable('products')
+                  const connectionsP = queryInterface.dropTable('connections')
+                  return Promise.all([productsP, connectionsP])
+                    .then(() => {
+                      const categoriesP = queryInterface.dropTable('categories')
+                      const usersP = queryInterface.dropTable('users')
+                      return Promise.all([categoriesP, usersP])
                     })
-                  })
-              })
-          })
+                })
+            })
+        })
     })
   }
 }
