@@ -1,6 +1,6 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
-  const Charge = sequelize.define('charge', {
+  const BankCharge = sequelize.define('bankCharge', {
     txnId: DataTypes.STRING,
     amount: DataTypes.INTEGER,
     amountRefunded: DataTypes.INTEGER,
@@ -8,15 +8,15 @@ module.exports = (sequelize, DataTypes) => {
     stage: DataTypes.STRING,
     status: DataTypes.STRING,
   })
-  Charge.associate = function(models) {
-    Charge.belongsTo(models.order, {
+  BankCharge.associate = function(models) {
+    BankCharge.belongsTo(models.order, {
       foreignKey: 'ordId',
       as: 'order'
     })
-    Charge.hasMany(models.refund, {
+    BankCharge.hasMany(models.refund, {
       foreignKey: 'chgId',
       as: 'refunds'
     })
   }
-  return Charge
+  return BankCharge
 }
