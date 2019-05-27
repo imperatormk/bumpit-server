@@ -75,19 +75,19 @@ const sendToBankAccount = (amount, custId) => {
 // helpers end
 
 exportsObj.releaseFunds = (orderId) => {
-  return db.charges.getCharge({ ordId: orderId })
+  return db.bankCharges.getCharge({ ordId: orderId })
     .then((charge) => {
       const forbiddenStages = ['RELEASED_HOLD', 'RELEASED']
       if (forbiddenStages.includes(charge.stage))
         return Promise.reject({ status: 400, msg: 'paymentAlreadyReleased' })
 
-      return db.charges.updateCharge({ id: charge.id, stage: 'RELEASED_HOLD' })
+      return db.bankCharges.updateCharge({ id: charge.id, stage: 'RELEASED_HOLD' })
     })
 }
 
 exportsObj.payoutFunds = (orderId, method) => {
   const getOrder = db.orders.getOrderById(orderId)
-  const getCharge = db.charges.getCharge({ ordId: orderId })
+  const getCharge = db.bankCharges.getCharge({ ordId: orderId })
 
   const availableActions = {
     balance: moveFromToAccountBalance,
@@ -127,14 +127,14 @@ exportsObj.payoutFunds = (orderId, method) => {
         .then((result) => {
           if (!result.status === 'success')
             return Promise.reject({ status: 500, msg: 'fundsPayoutFailed' })
-          return db.charges.updateCharge({ id: charge.id, stage: data.nextStage })
+          return db.bankCharges.updateCharge({ id: charge.id, stage: data.nextStage })
             .then(() => ({ success: true }))
         })
     })
 }
 
 exportsObj.refundOrder = (orderId, amount) => {
-  return db.charges.getCharge({ ordId: orderId })
+  return db.bankCharges.getCharge({ ordId: orderId })
     .then((charge) => {
       const amountProc = (amount > 0 && amount <= charge.amount) ? amount : charge.amount
       const refundObj = {
@@ -154,7 +154,7 @@ exportsObj.refundOrder = (orderId, amount) => {
     .then((result) => {
       const chargeId = result.charge.id
       const amountRefunded = result.refund.amount
-      return db.charges.updateCharge({ id: chargeId, stage: 'REFUNDED_HOLD', amountRefunded })
+      return db.bankCharges.updateCharge({ id: chargeId, stage: 'REFUNDED_HOLD', amountRefunded })
         .then(() => result.refund)
     })
 }

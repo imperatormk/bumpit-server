@@ -132,7 +132,7 @@ module.exports = {
 
           return Promise.all([images, reviews, likes, orders])
             .then(() => {
-              const charges = queryInterface.bulkInsert('charges', [{
+              const bankCharges = queryInterface.bulkInsert('bankCharges', [{
                 txnId: 'order1_1',
                 amount: 8500,
                 amountRefunded: 0,
@@ -154,7 +154,7 @@ module.exports = {
                 updatedAt: Sequelize.fn('NOW') // temp
               }], {})
 
-              return Promise.all([charges])
+              return Promise.all([bankCharges])
                 .then(() => {
                   const refunds = queryInterface.bulkInsert('refunds', [{
                     refId: 'refund1_2',
@@ -176,8 +176,8 @@ module.exports = {
       })
   },
   down: (queryInterface, Sequelize) => {
-    const charges = queryInterface.bulkDelete('charges', null, {})
-    return Promise.all([charges])
+    const bankCharges = queryInterface.bulkDelete('bankCharges', null, {})
+    return Promise.all([bankCharges])
       .then(() => {
         const categories = queryInterface.bulkDelete('categories', null, {})
         const users = queryInterface.bulkDelete('users', null, {})
