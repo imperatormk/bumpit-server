@@ -433,6 +433,10 @@ const refunds = (Sequelize) => ({
     primaryKey: true,
     type: Sequelize.INTEGER
   },
+  amount: {
+    type: Sequelize.INTEGER,
+    allowNull: false
+  },
   status: {
     type: Sequelize.STRING,
     allowNull: false
