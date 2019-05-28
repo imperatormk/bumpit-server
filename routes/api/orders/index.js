@@ -70,7 +70,7 @@ router.post('/', authMiddleware, (req, res, next) => { // here charge event is c
                     const balanceAction = {
                       direction: 'OUT',
                       amount: totalResults.balanceAmount,
-                      chgId: charge.id
+                      entryId: charge.id
                     }
                     const balanceChargePromise = db.balanceActions.insertBalanceAction(balanceAction)
                     charges.push(balanceChargePromise)

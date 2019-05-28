@@ -105,7 +105,7 @@ exportsObj.payoutFunds = (orderId, method) => {
   const availableActions = {
     payout: {
       balance: moveFromToAccountBalance,
-      bankAccount: sendToBankAccount
+      bankAccount: sendToBankAccount // TODO: implement this
     },
     refund: {
       balance: moveFromToAccountBalance,
@@ -114,6 +114,10 @@ exportsObj.payoutFunds = (orderId, method) => {
   }
 
   return Promise.all([getOrder, getCharge])
+    .then(([order, charge]) => {
+      if (!(order && charge)) return Promise.reject({ status: 400, msg: 'invalidData' })
+      return [order.toJSON(), charge.toJSON()]
+    })
     .then(([order, charge]) => {
       const allowedStages = ['RELEASED_HOLD', 'REFUNDED_HOLD']
       if (!allowedStages.includes(charge.stage))
@@ -128,7 +132,11 @@ exportsObj.payoutFunds = (orderId, method) => {
         nextStage: null
       }
 
-      data.amount = charge.amount
+      const balanceAmount = (charge.balanceCharge && charge.balanceCharge.amount) || 0
+      const bankAmount = (charge.bankCharge && charge.bankCharge.amount) || 0
+      const totalAmount = balanceAmount + bankAmount
+
+      data.amount = totalAmount
       if (charge.stage === 'REFUNDED_HOLD') {
         data.custId = buyer.stripeCustId
         data.nextStage = 'REFUNDED'
@@ -147,7 +155,7 @@ exportsObj.payoutFunds = (orderId, method) => {
         .then((result) => {
           if (!result.status === 'success')
             return Promise.reject({ status: 500, msg: 'fundsPayoutFailed' })
-          return db.bankCharges.updateCharge({ id: charge.id, stage: data.nextStage })
+          return db.charges.updateCharge({ id: charge.id, stage: data.nextStage })
             .then(() => ({ success: true }))
         })
     })
