@@ -1,6 +1,7 @@
 const router = require('express').Router()
 
 const apiRoutes = require('./api')
+const errorHandler = require('./error-handler')
 
 let startDate = new Date()
 
@@ -12,16 +13,6 @@ router.get('/', (req, res) => {
 })
 
 router.use('/api', apiRoutes)
-
-router.use((err, req, res, next) => {
-  if (!err) return next()
-  // TODO: add logger
-  const status = err.status || err.statusCode || 500
-  const body = {
-    msg: err.msg || err.message || err || 'unknownError',
-    details: err.details
-  }
-  return res.status(status).send(body)
-})
+router.use(errorHandler)
 
 module.exports = router
