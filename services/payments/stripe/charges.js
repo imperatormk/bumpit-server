@@ -5,15 +5,25 @@ const db = require(__basedir + '/db/controllers')
 const customersController = require('./customers')
 
 exportsObj.chargeAmount = (totalCharge, userId) => {
-  return db.users.findOneById(userId)
+  return db.users.getUserById(userId)
     .then((user) => {
       const { stripeCustId } = user
-      return getCustomerBalance(stripeCustId)
+      return customersController.getCustomerBalance(stripeCustId)
+        .then((balance) => {
+          const balanceAbs = Math.abs(balance)
+          return { id: stripeCustId, balance: balanceAbs }
+        })
     })
-    .then((balance) => {
+    .then((customer) => {
+      const balance = customer.balance
+      const stripeCustId = customer.id
+
       const totalAmount = totalCharge.amount
       const balanceAmount = (balance > totalAmount) ? totalAmount : balance
-      const bankAmount = totalAmount - balanceAmount
+      const bankAmount = (totalAmount - balanceAmount)
+
+      if (balanceAmount < 0 || bankAmount < 0)
+        return Promise.reject({ status: 400, msg: 'invalidPrice' })
 
       const willUseBalance = balanceAmount > 0
       const willUseBank = bankAmount > 0
@@ -26,7 +36,7 @@ exportsObj.chargeAmount = (totalCharge, userId) => {
       }
 
       const balanceAction = willUseBalance ? 
-        moveFromToAccountBalance(balanceAmount, userId) :
+        moveFromToAccountBalance(balanceAmount, stripeCustId) :
         Promise.resolve({ flag: true })
 
       return balanceAction
@@ -52,7 +62,7 @@ exportsObj.chargeAmount = (totalCharge, userId) => {
                 totalResult.bankResult = 'FAILURE'
                 return Promise.reject({ status: 400, msg: 'chargeFailed', details: totalResult })
               }
-              if (!bankResult.flag) totalResult.bankResult = 'SUCCESS'
+              if (!bankResult.flag) totalResult.bankResult = bankResult
               return totalResult
             })
         })

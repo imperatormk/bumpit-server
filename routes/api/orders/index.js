@@ -6,7 +6,7 @@ const db = require(__basedir + '/db/controllers')
 const chargesService = require(__basedir + '/services/payments').charges
 const eventsService = require(__basedir + '/services/events')
 
-router.get('/:id', function(req, res, next) {
+router.get('/:id', (req, res, next) => {
   const id = req.params.id
   return db.orders.getOrderById(id)
     .then((product) => {
@@ -16,7 +16,7 @@ router.get('/:id', function(req, res, next) {
     .catch(err => next(err))
 })
 
-router.post('/', authMiddleware, function(req, res, next) { // here charge event is created
+router.post('/', authMiddleware, (req, res, next) => { // here charge event is created
   const order = req.body
   const productId = order.productId
   const paymentToken = order.paymentToken
@@ -31,40 +31,83 @@ router.post('/', authMiddleware, function(req, res, next) { // here charge event
       return product.toJSON()
     })
     .then((product) => {
-      if (product.status !== 'AVAILABLE') return next({ status: 400, msg: 'productUnavailable' })
-      const orderObj = {
-        usrId: userId,
-        proId: productId,
-        status: 'PROCESSING'
-      }
-      const chargeObj = {
-        amount: product.price,
-        currency: product.currency,
+      if (product.status !== 'AVAILABLE')
+        return next({ status: 400, msg: 'productUnavailable' })
+
+      const amount = product.price
+      const currency = product.currency
+
+      const charge = {
+        amount,
+        currency,
         card: paymentToken,
         description: `Order for product #${productId}`
       }
-      // TODO: this HAS to be transactional
-      return db.orders.insertOrder(orderObj) // TODO: send mails here
-        .then((orderRes) => {
-          return chargesService.createCharge(chargeObj, orderRes.id)
-            .then((chargeRes) => ({ order: orderRes, charge: chargeRes }))
-        })
-        .then((resData) => {
-          return db.products.updateProduct({ ...product, status: 'SOLD' })
-            .then(() => resData)
-        })
-        .then((resData) => {
-          const orderId = resData.order.id
-          const chargeId = resData.charge.id
 
-          const event = {
-            type: 'CHARGE',
-            entryId: chargeId,
-            ordId: orderId
+      // TODO: this HAS to be transactional
+      return chargesService.chargeAmount(charge, userId)
+        .then((totalResults) => {
+          const order = {
+            proId: product.id,
+            usrId: userId,
+            status: 'PROCESSED'
           }
-          return eventsService.createEvent(event)
-            .then(() => res.send({ success: true }))
+          return db.orders.insertOrder(order)
+            .then((order) => {
+              const charge = {
+                currency: product.currency,
+                stage: 'ESCROW',
+                ordId: order.id
+              }
+              return db.charges.insertCharge(charge)
+                .then((charge) => {
+                  const charges = []
+
+                  const balanceResult = totalResults.balanceResult
+                  const bankResult = totalResults.bankResult
+
+                  if (balanceResult !== 'UNUSED') {
+                    const balanceAction = {
+                      direction: 'OUT',
+                      amount: totalResults.balanceAmount,
+                      chgId: charge.id
+                    }
+                    const balanceChargePromise = db.balanceActions.insertBalanceAction(balanceAction)
+                    charges.push(balanceChargePromise)
+                  } else {
+                    charges.push(Promise.resolve())
+                  }
+
+                  if (bankResult !== 'UNUSED') {
+                    const bankCharge = {
+                      txnId: bankResult.id,
+                      amount: bankResult.amount,
+                      status: bankResult.status,
+                      chgId: charge.id
+                    }
+                    const bankChargePromise = db.bankCharges.insertBankCharge(bankCharge)
+                    charges.push(bankChargePromise)
+                  } else {
+                    charges.push(Promise.resolve())
+                  }
+                  return Promise.all(charges)
+                    .then(() => { // use results here?
+                      const event = {
+                        type: 'CHARGE',
+                        entryId: charge.id,
+                        ordId: order.id
+                      }
+                      return eventsService.createEvent(event)
+                    })
+                })
+            })
+          // TODO: send mails here?
         })
+        .then(() => {
+          return db.products.updateProduct({ ...product, status: 'SOLD' })
+        })
+        .then(() => res.send({ success: true }))
+        .catch(err => next(err)) // TODO: try to rollback any of the successes?
     })
     .catch(err => next(err))
 })
@@ -137,7 +180,8 @@ router.post('/:id/refund', (req, res, next) => {
       return order.toJSON()
     })
     .then((order) => {
-      if (order.status === 'COMPLETED') return next({ status: 400, msg: 'orderNotRefundable' })
+      const forbiddenStates = ['COMPLETED', 'REFUNDED']
+      if (forbiddenStates.includes(order.status)) return next({ status: 400, msg: 'orderNotRefundable' })
 
       return chargesService.refundOrder(orderId, refundAmount)
         .then((refund) => {
