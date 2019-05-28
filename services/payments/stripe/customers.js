@@ -12,25 +12,17 @@ const createCustomer = (user) => {
     .then(customer => ({ id: customer.id }))
 }
 
-// next time you'll probably be able to use promises :)
-const wrappedFunctions = [
-  { title: 'getCustomersByCriteria', name: 'list', params: ['criteria'] },
-  { title: 'getCustomerById', name: 'retrieve', params: ['custId'] },
-  { title: 'updateCustomer', name: 'update', params: ['custId', 'config'] },
-]
-wrappedFunctions.forEach((fn) => {
-  exportsObj[fn.title] = (...args) => {
-    return new Promise((resolve, reject) => {
-      stripe.customers[fn.name](
-        ...args,
-        (err, result) => {
-          if (err) return reject(err)
-          return resolve(result)
-        }
-      )
-    })
-  }
-})
+exportsObj.getCustomersByCriteria = (criteria) => {
+  return stripe.customers.list(criteria)
+}
+
+exportsObj.getCustomerById = (custId) => {
+  return stripe.customers.retrieve(custId)
+}
+
+exportsObj.updateCustomer = (custId, values) => {
+  return stripe.customers.update(custId, values)
+}
 
 exportsObj.createCustomerIfNotExists = (user, uniqueKey) => {
   const criteria = {}
