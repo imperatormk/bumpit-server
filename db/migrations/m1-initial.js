@@ -437,6 +437,10 @@ const refunds = (Sequelize) => ({
     type: Sequelize.INTEGER,
     allowNull: false
   },
+  currency: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
   status: {
     type: Sequelize.STRING,
     allowNull: false
