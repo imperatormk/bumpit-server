@@ -115,8 +115,8 @@ exportsObj.payoutFunds = (orderId, method) => {
 
   return Promise.all([getOrder, getCharge])
     .then(([order, charge]) => {
-      const allowedStates = ['RELEASED_HOLD', 'REFUNDED_HOLD']
-      if (!allowedStates.includes(charge.stage))
+      const allowedStages = ['RELEASED_HOLD', 'REFUNDED_HOLD']
+      if (!allowedStages.includes(charge.stage))
         return Promise.reject({ status: 400, msg: 'unableToPayoutFunds' })
 
       const buyer = order.buyer
@@ -156,8 +156,8 @@ exportsObj.payoutFunds = (orderId, method) => {
 exportsObj.refundOrder = (orderId, refAmount) => { // note: this just inits refund
   return db.charges.getCharge({ ordId: orderId })
     .then((charge) => {
-      const allowedStates = ['RELEASED_HOLD', 'REFUNDED_HOLD', 'RELEASED', 'REFUNDED']
-      if (!allowedStates.includes(charge.stage))
+      const forbiddenStages = ['RELEASED_HOLD', 'REFUNDED_HOLD', 'RELEASED', 'REFUNDED']
+      if (forbiddenStages.includes(charge.stage))
         return Promise.reject({ status: 400, msg: 'unableToRefundOrder' })
 
       const currency = charge.currency

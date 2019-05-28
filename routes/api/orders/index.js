@@ -180,8 +180,8 @@ router.post('/:id/refund', (req, res, next) => {
       return order.toJSON()
     })
     .then((order) => {
-      const forbiddenStates = ['COMPLETED', 'REFUNDED']
-      if (forbiddenStates.includes(order.status)) return next({ status: 400, msg: 'orderNotRefundable' })
+      const forbiddenStatuses = ['COMPLETED', 'REFUNDED']
+      if (forbiddenStatuses.includes(order.status)) return next({ status: 400, msg: 'orderNotRefundable' })
 
       return chargesService.refundOrder(orderId, refundAmount)
         .then((refund) => {

@@ -7,11 +7,11 @@ module.exports = (sequelize, DataTypes) => {
   });
   BalanceAction.associate = function(models) {
     BalanceAction.belongsTo(models.order, {
-      foreignKey: 'ordId',
+      foreignKey: 'entryId',
       as: 'order'
     })
     BalanceAction.belongsTo(models.refund, {
-      foreignKey: 'refId',
+      foreignKey: 'entryId',
       as: 'refunds'
     })
   }
