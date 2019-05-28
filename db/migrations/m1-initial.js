@@ -504,41 +504,6 @@ const bankCharges = (Sequelize) => ({
   }
 })
 
-const bankRefunds = (Sequelize) => ({
-  id: {
-    allowNull: false,
-    autoIncrement: true,
-    primaryKey: true,
-    type: Sequelize.INTEGER
-  },
-  txnId: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
-  status: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
-  refId: {
-    type: Sequelize.INTEGER,
-    onDelete: 'CASCADE',
-    references: {
-      model: 'refunds',
-      key: 'id',
-      as: 'refId'
-    },
-    allowNull: false
-  },
-  createdAt: {
-    type: Sequelize.DATE,
-    defaultValue: Sequelize.NOW // bad
-  },
-  updatedAt: {
-    type: Sequelize.DATE,
-    defaultValue: Sequelize.NOW // bad
-  }
-})
-
 const balanceActions = (Sequelize) => ({
   id: {
     allowNull: false,
@@ -599,16 +564,14 @@ module.exports = {
                   return Promise.all([eventsP, shippingsP, chargesP, refundsP])
                     .then(() => {
                       const bankChargesP = queryInterface.createTable('bankCharges', bankCharges(Sequelize))
-                      const bankRefundsP = queryInterface.createTable('bankRefunds', bankRefunds(Sequelize))
                       const balanceActionsP = queryInterface.createTable('balanceActions', balanceActions(Sequelize))
-                      return Promise.all([bankChargesP, bankRefundsP, balanceActionsP])
+                      return Promise.all([bankChargesP, balanceActionsP])
                         .then(() => {
                           const reviewsU = addUnique(queryInterface, 'reviews', ['proId', 'usrId'])
                           const likesU = addUnique(queryInterface, 'likes', ['proId', 'usrId'])
                           const eventsU = addUnique(queryInterface, 'events', ['type', 'ordId'])
                           const bankChargesU = addUnique(queryInterface, 'bankCharges', ['txnId'])
-                          const bankRefundsU = addUnique(queryInterface, 'bankRefunds', ['txnId'])
-                          return Promise.all([reviewsU, likesU, eventsU, bankChargesU, bankRefundsU])
+                          return Promise.all([reviewsU, likesU, eventsU, bankChargesU])
                         })
                     })
                 })
@@ -619,9 +582,8 @@ module.exports = {
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction((t) => {
       const bankChargesP = queryInterface.dropTable('bankCharges')
-      const bankRefundsP = queryInterface.dropTable('bankRefunds')
       const balanceActionsP = queryInterface.dropTable('balanceActions')
-      return Promise.all([bankChargesP, bankRefundsP, balanceActionsP])
+      return Promise.all([bankChargesP, balanceActionsP])
         .then(() => {
           const chargesP = queryInterface.dropTable('charges')
           const refundsP = queryInterface.dropTable('refunds')

@@ -218,9 +218,8 @@ router.post('/:id/payout', (req, res, next) => {
     })
     .then((order) => {
       const allowedStatuses = ['COMPLETED', 'REFUNDED']
-      if (!allowedStatuses.includes(order.status)) 
+      if (!allowedStatuses.includes(order.status))
         return next({ status: 400, msg: 'orderStillPending' })
-
       return chargesService.payoutFunds(orderId, method)
         .then(result => res.send(result))
     })
