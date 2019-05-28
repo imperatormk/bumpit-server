@@ -61,7 +61,7 @@ exportsObj.chargeAmount = (totalCharge, userId) => {
 
 // helpers start, move?
 
-const moveFromToAccountBalance = (custId, amount) => {
+const moveFromToAccountBalance = (amount, custId) => {
   return customersController.updateCustomerBalanceBy(amount, custId)
 }
 
@@ -71,27 +71,36 @@ const chargeFromBankAccount = (chargeObj) => {
 const sendToBankAccount = (amount, custId) => {
   return Promise.reject({ status: 415, msg: 'notImplemented' })
 }
+const refundToBankAccount = (amount, custId) => {
+  return Promise.reject({ status: 415, msg: 'notImplemented' })
+}
 
 // helpers end
 
 exportsObj.releaseFunds = (orderId) => {
-  return db.bankCharges.getCharge({ ordId: orderId })
+  return db.charges.getCharge({ ordId: orderId })
     .then((charge) => {
       const forbiddenStages = ['RELEASED_HOLD', 'RELEASED']
       if (forbiddenStages.includes(charge.stage))
         return Promise.reject({ status: 400, msg: 'paymentAlreadyReleased' })
 
-      return db.bankCharges.updateCharge({ id: charge.id, stage: 'RELEASED_HOLD' })
+      return db.charges.updateCharge({ id: charge.id, stage: 'RELEASED_HOLD' })
     })
 }
 
 exportsObj.payoutFunds = (orderId, method) => {
   const getOrder = db.orders.getOrderById(orderId)
-  const getCharge = db.bankCharges.getCharge({ ordId: orderId })
+  const getCharge = db.charges.getCharge({ ordId: orderId })
 
   const availableActions = {
-    balance: moveFromToAccountBalance,
-    bankAccount: sendToBankAccount
+    payout: {
+      balance: moveFromToAccountBalance,
+      bankAccount: sendToBankAccount
+    },
+    refund: {
+      balance: moveFromToAccountBalance,
+      bankAccount: refundToBankAccount // TODO: implement this
+    }
   }
 
   return Promise.all([getOrder, getCharge])
@@ -109,20 +118,21 @@ exportsObj.payoutFunds = (orderId, method) => {
         nextStage: null
       }
 
+      data.amount = charge.amount
       if (charge.stage === 'REFUNDED_HOLD') {
         data.custId = buyer.stripeCustId
-        data.amount = charge.amountRefunded
         data.nextStage = 'REFUNDED'
+        data.type = 'refund'
       } else if (charge.stage === 'RELEASED_HOLD') {
         data.custId = seller.stripeCustId
-        data.amount = charge.amount
         data.nextStage = 'RELEASED'
+        data.type = 'payout'
       }
 
       if (!(data.custId && data.amount && data.nextStage))
         return Promise.reject({ status: 500, msg: 'fundsPayoutFailed' })
 
-      const methodAction = availableActions[method]
+      const methodAction = availableActions[data.type][method]
       return methodAction(data.amount, data.custId)
         .then((result) => {
           if (!result.status === 'success')
@@ -133,29 +143,35 @@ exportsObj.payoutFunds = (orderId, method) => {
     })
 }
 
-exportsObj.refundOrder = (orderId, amount) => {
-  return db.bankCharges.getCharge({ ordId: orderId })
+exportsObj.refundOrder = (orderId, refAmount) => { // note: this just inits refund
+  return db.charges.getCharge({ ordId: orderId })
     .then((charge) => {
-      const amountProc = (amount > 0 && amount <= charge.amount) ? amount : charge.amount
-      const refundObj = {
-        charge: charge.txnId,
-        amount: amountProc
-      }
-      return stripe.refunds.create(refundObj)
-        .then((refund) => db.refunds.insertRefund({
-          refId: refund.id,
-          chgId: charge.id,
-          amount: refund.amount,
-          currency: refund.currency,
-          status: refund.status
-        }))
-        .then(refund => ({ refund, charge }))
+      const allowedStates = ['RELEASED_HOLD', 'REFUNDED_HOLD', 'RELEASED', 'REFUNDED']
+      if (!allowedStates.includes(charge.stage))
+        return Promise.reject({ status: 400, msg: 'unableToRefundOrder' })
+
+      const currency = charge.currency
+      const nullCharge = { amount: 0 }
+      const bankCharge = charge.bankCharge || nullCharge
+      const balanceCharge = charge.balanceCharge || nullCharge
+      const amount = bankCharge.amount + balanceCharge.amount
+
+      return { amount, currency }
     })
-    .then((result) => {
-      const chargeId = result.charge.id
-      const amountRefunded = result.refund.amount
-      return db.bankCharges.updateCharge({ id: chargeId, stage: 'REFUNDED_HOLD', amountRefunded })
-        .then(() => result.refund)
+    .then((charge) => {
+      const amount = (refAmount > 0 && refAmount <= charge.amount) ? refAmount : charge.amount
+      const currency = charge.currency
+
+      return db.refunds.insertRefund({
+        amount,
+        currency,
+        status: 'HOLD',
+        ordId: orderId
+      })
+    })
+    .then((refund) => {
+      return db.charges.updateCharge({ stage: 'REFUNDED_HOLD' }, { ordId: orderId })
+        .then(() => refund)
     })
 }
 
