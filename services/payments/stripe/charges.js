@@ -36,7 +36,7 @@ exportsObj.chargeAmount = (totalCharge, userId) => {
       }
 
       const balanceAction = willUseBalance ? 
-        moveFromToAccountBalance(balanceAmount, stripeCustId) :
+        moveFromToAccountBalance(-balanceAmount, stripeCustId) :
         Promise.resolve({ flag: true })
 
       return balanceAction
@@ -81,9 +81,6 @@ const chargeFromBankAccount = (chargeObj) => {
 const sendToBankAccount = (amount, custId) => {
   return Promise.reject({ status: 415, msg: 'notImplemented' })
 }
-const refundToBankAccount = (amount, custId) => {
-  return Promise.reject({ status: 415, msg: 'notImplemented' })
-}
 
 // helpers end
 
@@ -103,14 +100,8 @@ exportsObj.payoutFunds = (orderId, method) => {
   const getCharge = db.charges.getCharge({ ordId: orderId })
 
   const availableActions = {
-    payout: {
-      balance: moveFromToAccountBalance,
-      bankAccount: sendToBankAccount // TODO: implement this
-    },
-    refund: {
-      balance: moveFromToAccountBalance,
-      bankAccount: refundToBankAccount // TODO: implement this
-    }
+    balance: moveFromToAccountBalance,
+    bankAccount: sendToBankAccount // TODO: implement this
   }
 
   return Promise.all([getOrder, getCharge])
@@ -119,11 +110,10 @@ exportsObj.payoutFunds = (orderId, method) => {
       return [order.toJSON(), charge.toJSON()]
     })
     .then(([order, charge]) => {
-      const allowedStages = ['RELEASED_HOLD', 'REFUNDED_HOLD']
+      const allowedStages = ['RELEASED_HOLD']
       if (!allowedStages.includes(charge.stage))
         return Promise.reject({ status: 400, msg: 'unableToPayoutFunds' })
 
-      const buyer = order.buyer
       const seller = order.product.seller
 
       const data = {
@@ -137,20 +127,15 @@ exportsObj.payoutFunds = (orderId, method) => {
       const totalAmount = balanceAmount + bankAmount
 
       data.amount = totalAmount
-      if (charge.stage === 'REFUNDED_HOLD') {
-        data.custId = buyer.stripeCustId
-        data.nextStage = 'REFUNDED'
-        data.type = 'refund'
-      } else if (charge.stage === 'RELEASED_HOLD') {
+      if (charge.stage === 'RELEASED_HOLD') {
         data.custId = seller.stripeCustId
         data.nextStage = 'RELEASED'
-        data.type = 'payout'
       }
 
       if (!(data.custId && data.amount && data.nextStage))
         return Promise.reject({ status: 500, msg: 'fundsPayoutFailed' })
 
-      const methodAction = availableActions[data.type][method]
+      const methodAction = availableActions[method]
       return methodAction(data.amount, data.custId)
         .then((result) => {
           if (!result.status === 'success')
@@ -161,34 +146,43 @@ exportsObj.payoutFunds = (orderId, method) => {
     })
 }
 
-exportsObj.refundOrder = (orderId, refAmount) => { // note: this just inits refund
-  return db.charges.getCharge({ ordId: orderId })
-    .then((charge) => {
-      const forbiddenStages = ['RELEASED_HOLD', 'REFUNDED_HOLD', 'RELEASED', 'REFUNDED']
+exportsObj.refundOrder = (orderId, refAmount) => {
+  const getOrder = db.orders.getOrderById(orderId)
+  const getCharge = db.charges.getCharge({ ordId: orderId })
+
+  return Promise.all([getOrder, getCharge])
+    .then(([order, charge]) => {
+      if (!(order && charge)) return Promise.reject({ status: 400, msg: 'invalidData' })
+      return [order.toJSON(), charge.toJSON()]
+    })
+    .then(([order, charge]) => {
+      const forbiddenStages = ['RELEASED_HOLD', 'RELEASED', 'REFUNDED']
       if (forbiddenStages.includes(charge.stage))
         return Promise.reject({ status: 400, msg: 'unableToRefundOrder' })
 
-      const currency = charge.currency
       const nullCharge = { amount: 0 }
       const bankCharge = charge.bankCharge || nullCharge
       const balanceCharge = charge.balanceCharge || nullCharge
-      const amount = bankCharge.amount + balanceCharge.amount
+      const totalAmount = bankCharge.amount + balanceCharge.amount
 
-      return { amount, currency }
-    })
-    .then((charge) => {
-      const amount = (refAmount > 0 && refAmount <= charge.amount) ? refAmount : charge.amount
+      const amount = (refAmount > 0 && refAmount <= totalAmount) ? refAmount : totalAmount
       const currency = charge.currency
+      const buyer = order.buyer
 
-      return db.refunds.insertRefund({
-        amount,
-        currency,
-        status: 'HOLD',
-        ordId: orderId
-      })
+      return moveFromToAccountBalance(amount, buyer.stripeCustId)
+        .then((result) => {
+          if (!result.status === 'success')
+            return Promise.reject({ status: 500, msg: 'refundFailed' })
+          return db.refunds.insertRefund({
+            amount,
+            currency,
+            status: 'COMPLETED',
+            ordId: orderId
+          })
+        })
     })
     .then((refund) => {
-      return db.charges.updateCharge({ stage: 'REFUNDED_HOLD' }, { ordId: orderId })
+      return db.charges.updateCharge({ stage: 'REFUNDED' }, { ordId: orderId })
         .then(() => refund)
     })
 }
