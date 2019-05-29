@@ -112,7 +112,7 @@ router.post('/', authMiddleware, (req, res, next) => { // here charge event is c
     .catch(err => next(err))
 })
 
-router.post('/:id/ship', (req, res, next) => {
+router.post('/:id/ship', authMiddleware, (req, res, next) => {
   const orderId = req.params.id
   const shipping = req.body
 
@@ -140,7 +140,7 @@ router.post('/:id/ship', (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.post('/:id/complete', (req, res, next) => {
+router.post('/:id/complete', authMiddleware, (req, res, next) => {
   const orderId = req.params.id
 
   return db.orders.getOrderById(orderId) // DRY!
@@ -167,7 +167,7 @@ router.post('/:id/complete', (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.post('/:id/refund', (req, res, next) => {
+router.post('/:id/refund', authMiddleware, (req, res, next) => {
   const orderId = req.params.id
   const refund = req.body
   const refundAmount = refund.amount || null
@@ -202,7 +202,7 @@ router.post('/:id/refund', (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.post('/:id/payout', (req, res, next) => {
+router.post('/:id/payout', authMiddleware, (req, res, next) => {
   const orderId = req.params.id
   const { method } = req.body
 
