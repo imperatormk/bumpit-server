@@ -12,7 +12,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {
     defaultScope: {
       include: [
-        { model: sequelize.models.category, as: 'category', attributes: ['name'] }
+        { model: sequelize.models.category, as: 'category', attributes: ['name'] },
+        { model: sequelize.models.image, as: 'images' },
       ]
     }
   })

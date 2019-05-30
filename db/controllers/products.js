@@ -5,21 +5,13 @@ const Image = require('../models').image
 const User = require('../models').user
 
 exportsObj.getProducts = () => {
-	const options = {
-		include: [{
-			model: Image,
-			as: 'images'
-		}]
-	}
+	const options = {}
 	return Product.findAll(options)
 }
 
 exportsObj.getProduct = (productId) => {
 	const options = {
 		include: [{
-			model: Image,
-			as: 'images'
-		}, {
 			model: User,
 			as: 'seller'
 		}],
