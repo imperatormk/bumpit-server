@@ -10,7 +10,7 @@ router.get('/:id', (req, res, next) => {
   const id = req.params.id
   return db.orders.getOrderById(id)
     .then((product) => {
-      if (!product) return next({ status: 404, msg: 'notFound' })
+      if (!product) throw { status: 404, msg: 'notFound' }
       return res.send(product)
     })
     .catch(err => next(err))
@@ -25,14 +25,14 @@ router.post('/', authMiddleware, (req, res, next) => { // here charge event is c
   return db.products.getProduct(productId) // DRY!
     .then((product) => {
       if (!product)
-        return next({ status: 400, msg: 'badProduct' })
+        throw { status: 400, msg: 'badProduct' }
       if (product.selId === userId)
-        return next({ status: 400, msg: 'cantBuyFromSelf' })
+        throw { status: 400, msg: 'cantBuyFromSelf' }
       return product.toJSON()
     })
     .then((product) => {
       if (product.status !== 'AVAILABLE')
-        return next({ status: 400, msg: 'productUnavailable' })
+        throw { status: 400, msg: 'productUnavailable' }
 
       const amount = product.price
       const currency = product.currency
@@ -118,11 +118,13 @@ router.post('/:id/ship', authMiddleware, (req, res, next) => {
 
   return db.orders.getOrderById(orderId) // DRY!
     .then((order) => {
-      if (!order) return next({ status: 400, msg: 'badOrder' })
+      if (!order)
+        throw { status: 400, msg: 'badOrder' }
       return order.toJSON()
     })
     .then((order) => {
-      if (order.status !== 'PROCESSING') return next({ status: 400, msg: 'orderNotShippable' })
+      if (order.status !== 'PROCESSING')
+        throw { status: 400, msg: 'orderNotShippable' }
       shipping.ordId = orderId
 
       return db.shipping.insertShipping(shipping)
@@ -145,13 +147,13 @@ router.post('/:id/complete', authMiddleware, (req, res, next) => {
 
   return db.orders.getOrderById(orderId) // DRY!
     .then((order) => {
-      if (!order) return next({ status: 400, msg: 'badOrder' })
+      if (!order) throw { status: 400, msg: 'badOrder' }
       return order.toJSON()
     })
     .then((order) => {
       const allowedStatuses = ['SHIPPED', 'DISPUTED']
       if (!allowedStatuses.includes(order.status))
-        return next({ status: 400, msg: 'orderNotCompleteable' })
+        throw { status: 400, msg: 'orderNotCompleteable' }
 
       return chargesService.releaseFunds(orderId)
         .then(() => {
@@ -174,14 +176,15 @@ router.post('/:id/refund', authMiddleware, (req, res, next) => {
 
   return db.orders.getOrderById(orderId) // DRY!
     .then((order) => {
-      if (!order) return next({ status: 400, msg: 'badOrder' })
+      if (!order) throw { status: 400, msg: 'badOrder' }
       if (refundAmount != null && (refundAmount > order.price || refundAmount <= 0))
-        return next({ status: 400, msg: 'invalidRefund' })
+        throw { status: 400, msg: 'invalidRefund' }
       return order.toJSON()
     })
     .then((order) => {
       const forbiddenStatuses = ['COMPLETED', 'REFUNDED']
-      if (forbiddenStatuses.includes(order.status)) return next({ status: 400, msg: 'orderNotRefundable' })
+      if (forbiddenStatuses.includes(order.status))
+        throw { status: 400, msg: 'orderNotRefundable' }
 
       return chargesService.refundOrder(orderId, refundAmount)
         .then((refund) => {
@@ -208,18 +211,18 @@ router.post('/:id/payout', authMiddleware, (req, res, next) => {
 
   const availableMethods = ['balance', 'bankAccount']
   if (!availableMethods.includes(method))
-    return next({ status: 400, msg: 'invalidPayoutMethod' })
+    throw { status: 400, msg: 'invalidPayoutMethod' }
 
   return db.orders.getOrderById(orderId) // DRY!
     .then((order) => {
       if (!order)
-        return next({ status: 400, msg: 'badOrder' })
+        throw { status: 400, msg: 'badOrder' }
       return order.toJSON()
     })
     .then((order) => {
       const allowedStatuses = ['COMPLETED', 'REFUNDED']
       if (!allowedStatuses.includes(order.status))
-        return next({ status: 400, msg: 'orderStillPending' })
+        throw { status: 400, msg: 'orderStillPending' }
       return chargesService.payoutFunds(orderId, method)
         .then(result => res.send(result))
     })

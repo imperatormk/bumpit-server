@@ -12,7 +12,8 @@ router.get('/:id', function(req, res, next) {
   const id = req.params.id
   return db.products.getProduct(id)
     .then((product) => {
-      if (!product) return next({ status: 404, msg: 'notFound' })
+      if (!product)
+        throw { status: 404, msg: 'notFound' }
       return res.send(product)
     })
     .catch(err => next(err))
