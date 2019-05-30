@@ -9,6 +9,12 @@ module.exports = (sequelize, DataTypes) => {
     size: DataTypes.STRING,
     location: DataTypes.STRING,
     status: DataTypes.STRING,
+  }, {
+    defaultScope: {
+      include: [
+        { model: sequelize.models.category, as: 'category', attributes: ['name'] }
+      ]
+    }
   })
   Product.associate = function(models) {
     Product.belongsTo(models.category, {
