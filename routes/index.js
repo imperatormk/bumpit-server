@@ -6,7 +6,7 @@ const errorHandler = require('./error-handler')
 let startDate = new Date()
 
 router.get('/', (req, res) => {
-  return res.json({
+  return res.send({
     sane: true,
 	  startDate
   })
