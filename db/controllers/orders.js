@@ -2,6 +2,7 @@ const exportsObj = {}
 
 const Order = require('../models').order
 const Product = require('../models').product
+const Shipping = require('../models').shipping
 const User = require('../models').user
 
 exportsObj.getOrders = () => {
@@ -20,6 +21,9 @@ exportsObj.getOrderById = (orderId) => {
 		}, {
 			model: User,
 			as: 'buyer'
+		}, {
+			model: Shipping,
+			as: 'shipping'
 		}],
 		where: { id: orderId }
 	}

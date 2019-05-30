@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'ordId',
       as: 'charge'
     })
+    Order.hasOne(models.shipping, {
+      foreignKey: 'ordId',
+      as: 'shipping'
+    })
   }
   return Order
 }
