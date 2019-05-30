@@ -11,6 +11,8 @@ module.exports = {
   	  const users = queryInterface.bulkInsert('users', [{
       	username: 'mr.mach',
         password: '$2y$12$bJebJvoEk3YdbskBW7KuoePMgfGqQAh6TXfz1tdDamNZQLBJYxb6W',
+        name: 'Martin',
+        surname: 'Mrmach',
         location: 'Macedonia',
         bio: 'Coder?',
         email: 'mr.mach@gmail.com',
@@ -21,6 +23,8 @@ module.exports = {
       }, {
       	username: 'imperatormk',
         password: '$2b$12$Q3lLMkZoMhEMg03a7deHBeksDQwB8k1rllH83zA7vyG7Ue7Y6g5ry',
+        name: 'Darko',
+        surname: 'Simonovski',
         location: 'Macedonia',
         bio: 'Coder?',
         email: 'darko.simonovski@hotmail.com',
