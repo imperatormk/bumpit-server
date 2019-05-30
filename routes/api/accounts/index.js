@@ -11,6 +11,17 @@ router.post('/register', (req, res, next) => {
     .catch(err => next(err))
 })
 
+router.get('/:id', (req, res, next) => {
+  const userId = req.params.id
+
+  return db.users.getUserById(userId) // DRY!
+    .then((user) => {
+      if (!user) throw { status: 404, msg: 'userNotFound' }
+      return res.send(user)
+    })
+    .catch(err => next(err))
+})
+
 router.post('/:id/connections', (req, res, next) => {
   const userId = req.params.id
   const config = req.body || {}
@@ -19,7 +30,7 @@ router.post('/:id/connections', (req, res, next) => {
   
   return db.users.getUserById(userId) // DRY!
     .then((user) => {
-      if (!user) throw { status: 400, msg: 'invalidData' }
+      if (!user) throw { status: 404, msg: 'userNotFound' }
       return user
     })
     .then((user) => db.connections.getConnectionsForUser(user.id, types))
@@ -54,7 +65,7 @@ router.put('/:id/social', authMiddleware, (req, res, next) => {
 
   return db.users.getUserById(userId) // DRY!
     .then((user) => {
-      if (!user) throw { status: 400, msg: 'invalidData' }
+      if (!user) throw { status: 404, msg: 'userNotFound' }
       return user
     })
     .then((user) => {
