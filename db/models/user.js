@@ -43,8 +43,12 @@ module.exports = (sequelize, DataTypes) => {
       as: 'orders'
     })
     User.hasMany(models.connection, {
-      foreignKey: 'usrId',
-      as: 'connections'
+      foreignKey: 'usrFromId',
+      as: 'followees'
+    })
+    User.hasMany(models.connection, {
+      foreignKey: 'usrToId',
+      as: 'followers'
     })
   }
   return User
