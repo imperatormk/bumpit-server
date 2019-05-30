@@ -149,7 +149,7 @@ router.post('/:id/complete', authMiddleware, (req, res, next) => {
       return order.toJSON()
     })
     .then((order) => {
-      const allowedStatuses = ['IN_TRANSIT', 'IN_DISPUTE']
+      const allowedStatuses = ['SHIPPED', 'DISPUTED']
       if (!allowedStatuses.includes(order.status))
         return next({ status: 400, msg: 'orderNotCompleteable' })
 

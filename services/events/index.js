@@ -15,7 +15,7 @@ const validateEvent = (eventObj) => {
 const moveToNextState = (eventType) => {
   const map = {
     'CHARGE': 'PROCESSING',
-    'SHIPPING': 'IN_TRANSIT',
+    'SHIPPING': 'SHIPPED',
     'DISPUTE': 'DISPUTED',
     'COMPLETION': 'COMPLETED',
     'REFUND': 'REFUNDED'
