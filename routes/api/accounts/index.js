@@ -13,15 +13,32 @@ router.post('/register', (req, res, next) => {
 
 router.post('/:id/connections', (req, res, next) => {
   const userId = req.params.id
-  const config = req.body.types || []
+  const config = req.body || {}
+  const types = config.types || []
+  const count = config.count === true
   
   return db.users.getUserById(userId) // DRY!
     .then((user) => {
       if (!user) throw { status: 400, msg: 'invalidData' }
       return user
     })
-    .then((user) => db.connections.getConnectionsForUser(user.id, config))
-    .then(connections => res.send(connections))
+    .then((user) => db.connections.getConnectionsForUser(user.id, types))
+    .then((connections) => {
+      if (!count) return res.send(connections)
+      let followerCount = 0
+      let followeeCount = 0
+
+      connections.forEach((connection) => {
+        if (connection.type === 'follower') followerCount += 1
+        if (connection.type === 'followee') followeeCount += 1
+      })
+
+      const conCounts = {
+        followers: followerCount,
+        followees: followeeCount
+      }
+      return res.send(conCounts)
+    })
     .catch(err => next(err))
 })
 
