@@ -1,5 +1,15 @@
 'use strict'
 
+const shippingInfoObj = {
+  fullname: 'Darko Simonovski',
+  address: 'Apostol Zdravevski 34',
+  unit: '2nd floor',
+  state: 'North Macedonia',
+  city: 'Bitola',
+  zipcode: '7000',
+  contactPhone: '070-727-051'
+}
+
 module.exports = {
   up: (queryInterface, Sequelize) => {
       const categories = queryInterface.bulkInsert('categories', [{
@@ -35,16 +45,6 @@ module.exports = {
       }], {})
   
   	  return Promise.all([categories, users]).then(() => {
-        const shippingInfoObj = {
-          fullname: 'Darko Simonovski',
-          address: 'Apostol Zdravevski 34',
-          unit: '2nd floor',
-          state: 'North Macedonia',
-          city: 'Bitola',
-          zipcode: '7000',
-          contactPhone: '070-727-051'
-        }
-
         const shippingInfo = queryInterface.bulkInsert('shippingInfo',[{
           ...shippingInfoObj,
           usrId: 1
@@ -141,12 +141,14 @@ module.exports = {
           const orders = queryInterface.bulkInsert('orders', [{
             usrId: 1,
             proId: 1,
+            shippingInfo: JSON.stringify(shippingInfoObj),
             status: 'PROCESSING',
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp
           }, {
             usrId: 1,
             proId: 3,
+            shippingInfo: JSON.stringify(shippingInfoObj),
             status: 'PROCESSING',
             createdAt: Sequelize.fn('NOW'), // temp
             updatedAt: Sequelize.fn('NOW') // temp

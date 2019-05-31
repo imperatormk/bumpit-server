@@ -302,6 +302,10 @@ const orders = (Sequelize) => ({
     primaryKey: true,
     type: Sequelize.INTEGER
   },
+  shippingInfo: {
+    type: Sequelize.JSON,
+    allowNull: false
+  },
   status: {
     type: Sequelize.STRING,
     allowNull: false
@@ -342,10 +346,6 @@ const shippings = (Sequelize) => ({
     autoIncrement: true,
     primaryKey: true,
     type: Sequelize.INTEGER
-  },
-  address: {
-    type: Sequelize.STRING,
-    allowNull: false
   },
   trackingNo: {
     type: Sequelize.STRING

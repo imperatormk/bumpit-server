@@ -2,6 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Order = sequelize.define('order', {
     status: DataTypes.STRING,
+    shippingInfo: DataTypes.JSON,
   })
   Order.associate = function(models) {
     Order.belongsTo(models.product, {
