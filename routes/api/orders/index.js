@@ -16,51 +16,61 @@ router.get('/:id', (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.post('/', authMiddleware, (req, res, next) => { // here charge event is created
-  const order = req.body
-  const productId = order.productId
-  const paymentToken = order.paymentToken
-  const userId = req.user.id
-
-  return db.products.getProduct(productId) // DRY!
-    .then((product) => {
+const prepareOrder = (order) => {
+  const checks = [
+    db.products.getProduct(order.productId),
+    db.shippingInfos.getShippingInfoForUser(order.userId)
+  ]
+  return Promise.all(checks)
+    .then(([product, shippingInfo]) => {
       if (!product)
         throw { status: 400, msg: 'badProduct' }
-      if (product.selId === userId)
+      if (product.selId === order.userId)
         throw { status: 400, msg: 'cantBuyFromSelf' }
-      return product.toJSON()
-    })
-    .then((product) => {
       if (product.status !== 'AVAILABLE')
-        throw { status: 400, msg: 'productUnavailable' }
+        throw { status: 400, msg: 'productSold' }
+      if (!shippingInfo)
+        throw { status: 400, msg: 'noShippingInfo' }
 
-      const amount = product.price
-      const currency = product.currency
-
-      const charge = {
-        amount,
-        currency,
-        card: paymentToken,
-        description: `Order for product #${productId}`
+      const results = {
+        order: {
+          proId: product.id,
+          usrId: order.userId,
+          shippingInfo: JSON.stringify(shippingInfo),
+          status: 'PROCESSED'
+        },
+        charge: {
+          amount: product.price,
+          currency: product.currency,
+          card: order.paymentToken,
+          description: `Order for product #${order.productId}`
+        }
       }
+      return results
+    })
+}
+
+router.post('/', authMiddleware, (req, res, next) => { // here charge event is created
+  const order = req.body
+  const userId = req.user.id
+
+  return prepareOrder({ ...order , userId })
+    .then((results) => {
+      const order = results.order
+      const charge = results.charge
 
       // TODO: this HAS to be transactional
       return chargesService.chargeAmount(charge, userId)
         .then((totalResults) => {
-          const order = {
-            proId: product.id,
-            usrId: userId,
-            status: 'PROCESSED'
-          }
           return db.orders.insertOrder(order)
-            .then((order) => {
-              const charge = {
-                currency: product.currency,
+            .then((orderEntry) => {
+              const chargeEntry = {
+                currency: charge.currency,
                 stage: 'ESCROW',
-                ordId: order.id
+                ordId: orderEntry.id
               }
-              return db.charges.insertCharge(charge)
-                .then((charge) => {
+              return db.charges.insertCharge(chargeEntry)
+                .then((chargeEntry) => {
                   const charges = []
 
                   const balanceResult = totalResults.balanceResult
@@ -70,7 +80,7 @@ router.post('/', authMiddleware, (req, res, next) => { // here charge event is c
                     const balanceAction = {
                       direction: 'OUT',
                       amount: totalResults.balanceAmount,
-                      entryId: charge.id
+                      entryId: chargeEntry.id
                     }
                     const balanceChargePromise = db.balanceActions.insertBalanceAction(balanceAction)
                     charges.push(balanceChargePromise)
@@ -83,7 +93,7 @@ router.post('/', authMiddleware, (req, res, next) => { // here charge event is c
                       txnId: bankResult.id,
                       amount: bankResult.amount,
                       status: bankResult.status,
-                      chgId: charge.id
+                      chgId: chargeEntry.id
                     }
                     const bankChargePromise = db.bankCharges.insertBankCharge(bankCharge)
                     charges.push(bankChargePromise)
@@ -94,8 +104,8 @@ router.post('/', authMiddleware, (req, res, next) => { // here charge event is c
                     .then(() => { // use results here?
                       const event = {
                         type: 'CHARGE',
-                        entryId: charge.id,
-                        ordId: order.id
+                        entryId: chargeEntry.id,
+                        ordId: orderEntry.id
                       }
                       return eventsService.createEvent(event)
                     })
@@ -104,7 +114,7 @@ router.post('/', authMiddleware, (req, res, next) => { // here charge event is c
           // TODO: send mails here?
         })
         .then(() => {
-          return db.products.updateProduct({ ...product, status: 'SOLD' })
+          return db.products.updateProduct({ id: order.proId, status: 'SOLD' })
         })
         .then(() => res.send({ success: true }))
         .catch(err => next(err)) // TODO: try to rollback any of the successes?
