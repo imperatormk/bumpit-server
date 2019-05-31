@@ -35,6 +35,24 @@ module.exports = {
       }], {})
   
   	  return Promise.all([categories, users]).then(() => {
+        const shippingInfoObj = {
+          fullname: 'Darko Simonovski',
+          address: 'Apostol Zdravevski 34',
+          unit: '2nd floor',
+          state: 'North Macedonia',
+          city: 'Bitola',
+          zipcode: '7000',
+          contactPhone: '070-727-051'
+        }
+
+        const shippingInfo = queryInterface.bulkInsert('shippingInfo',[{
+          ...shippingInfoObj,
+          usrId: 1
+        }, {
+          ...shippingInfoObj,
+          usrId: 2
+        }], {})
+
         const products = queryInterface.bulkInsert('products', [{
           catId: 1,
           selId: 1,
@@ -85,7 +103,7 @@ module.exports = {
           updatedAt: Sequelize.fn('NOW') // temp
         }], {})
 
-      	return Promise.all([products, connections]).then(() => {
+      	return Promise.all([shippingInfo, products, connections]).then(() => {
       	  const images = queryInterface.bulkInsert('images', [{
             proId: 1,
             url: 'https://via.placeholder.com/500x300',
@@ -143,9 +161,10 @@ module.exports = {
     const users = queryInterface.bulkDelete('users', null, {})
     return Promise.all([categories, users])
       .then(() => {
+      const shippingInfo = queryInterface.bulkDelete('shippingInfo', null, {})
       const products = queryInterface.bulkDelete('products', null, {})
       const connections = queryInterface.bulkDelete('connections', null, {})
-      return Promise.all([products, connections])
+      return Promise.all([shippingInfo, products, connections])
         .then(() => {
           const images = queryInterface.bulkDelete('images', null, {})
           const reviews = queryInterface.bulkDelete('reviews', null, {})

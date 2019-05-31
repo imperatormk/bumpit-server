@@ -68,6 +68,53 @@ const users = (Sequelize) => ({
   }
 })
 
+const shippingInfo = (Sequelize) => ({
+  id: {
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+    type: Sequelize.INTEGER
+  },
+  fullname: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  address: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  unit: {
+    type: Sequelize.STRING
+  },
+  state: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  city: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  zipcode: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  contactPhone: {
+    type: Sequelize.STRING,
+    allowNull: false
+  },
+  usrId: {
+    type: Sequelize.INTEGER,
+    onDelete: 'CASCADE',
+    references: {
+      model: 'users',
+      key: 'id',
+      as: 'usrId'
+    },
+    allowNull: false,
+    unique: true
+  },
+})
+
 const products = (Sequelize) => ({
   id: {
     allowNull: false,
@@ -336,11 +383,13 @@ const events = (Sequelize) => ({
   },
   type: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: 'eventsUnique'
   },
   entryId: {
     type: Sequelize.INTEGER,
-    allowNull: false
+    allowNull: false,
+    unique: 'eventsUnique'
   },
   ordId: {
     type: Sequelize.INTEGER,
@@ -350,7 +399,8 @@ const events = (Sequelize) => ({
       key: 'id',
       as: 'ordId'
     },
-    allowNull: false
+    allowNull: false,
+    unique: 'eventsUnique'
   },
   createdAt: {
     type: Sequelize.DATE,
@@ -482,7 +532,8 @@ const bankCharges = (Sequelize) => ({
   },
   txnId: {
     type: Sequelize.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   amount: {
     type: Sequelize.INTEGER,
@@ -500,7 +551,8 @@ const bankCharges = (Sequelize) => ({
       key: 'id',
       as: 'chgId'
     },
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   createdAt: {
     type: Sequelize.DATE,
@@ -555,9 +607,10 @@ module.exports = {
       const usersP = queryInterface.createTable('users', users(Sequelize))
       return Promise.all([categoriesP, usersP])
         .then(() => {
+          const shippingInfoP = queryInterface.createTable('shippingInfo', shippingInfo(Sequelize))
           const productsP = queryInterface.createTable('products', products(Sequelize))
           const connectionsP = queryInterface.createTable('connections', connections(Sequelize))
-          return Promise.all([productsP, connectionsP])
+          return Promise.all([shippingInfoP, productsP, connectionsP])
             .then(() => {
               const imagesP = queryInterface.createTable('images', images(Sequelize))
               const reviewsP = queryInterface.createTable('reviews', reviews(Sequelize))
@@ -578,8 +631,7 @@ module.exports = {
                           const reviewsU = addUnique(queryInterface, 'reviews', ['proId', 'usrId'])
                           const likesU = addUnique(queryInterface, 'likes', ['proId', 'usrId'])
                           const eventsU = addUnique(queryInterface, 'events', ['type', 'ordId'])
-                          const bankChargesU = addUnique(queryInterface, 'bankCharges', ['txnId'])
-                          return Promise.all([reviewsU, likesU, eventsU, bankChargesU])
+                          return Promise.all([reviewsU, likesU, eventsU])
                         })
                     })
                 })
@@ -607,7 +659,8 @@ module.exports = {
                 .then(() => {
                   const productsP = queryInterface.dropTable('products')
                   const connectionsP = queryInterface.dropTable('connections')
-                  return Promise.all([productsP, connectionsP])
+                  const shippingInfoP = queryInterface.dropTable('shippingInfo')
+                  return Promise.all([productsP, connectionsP, shippingInfoP])
                     .then(() => {
                       const categoriesP = queryInterface.dropTable('categories')
                       const usersP = queryInterface.dropTable('users')
