@@ -18,6 +18,17 @@ router.get('/:id', (req, res, next) => {
 })
 
 const prepareOrder = (order, mode) => { // here mode is a bit stiff but okay
+  const calculateTotal = (chargesList) => { // move this eventually?
+    let amount = 0
+    chargesList.forEach((chargeItem) => {
+      if (chargeItem.flat)
+        amount += chargeItem.flat.amount
+      if (chargeItem.percentage)
+        amount = amount * (1 + (chargeItem.percentage) / 100)
+    })
+    return amount.toFixed(2)
+  }
+
   const { userId, productId, extras, paymentToken } = order
 
   const checks = [
@@ -42,30 +53,32 @@ const prepareOrder = (order, mode) => { // here mode is a bit stiff but okay
         currency: product.currency
       }
 
-      if (mode === 'create') { // so this might belong to another fn
-        const results = {
-          order: {
-            proId: product.id,
-            usrId: userId,
-            shippingInfo: JSON.stringify(shippingInfo),
-            status: 'PROCESSED'
-          },
-          charge: {
-            ...charge,
-            card: paymentToken,
-            description: `Order for product #${productId}`
-          }
-        }
-        return results
-      }
-
       const initial = { ...charge }
-      const calculateCharges = paymentsService.calculateCharges(initial, extras)
+      const calculateChargesList = paymentsService.calculateChargesList(initial, extras)
 
-      return calculateCharges
-        .then((chargeList) => {
+      return calculateChargesList
+        .then((chargesList) => {
+          if (mode === 'create') { // so this might belong to another fn
+            const results = {
+              order: {
+                proId: product.id,
+                usrId: userId,
+                shippingInfo: JSON.stringify(shippingInfo),
+                status: 'PROCESSED'
+              },
+              charge: {
+                ...charge,
+                amount: calculateTotal(chargesList),
+                card: paymentToken,
+                description: `Order for product #${productId}`
+              }
+            }
+            return results
+          }
+
           const results = {
-            chargeList
+            chargesList,
+            total: calculateTotal(chargesList)
           }
           return results
         })
@@ -91,6 +104,7 @@ router.post('/create', authMiddleware, (req, res, next) => {
     .then((results) => {
       const order = results.order
       const charge = results.charge
+      console.log(charge)
 
       // TODO: this HAS to be transactional
       return chargesService.chargeAmount(charge, userId)

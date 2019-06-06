@@ -5,7 +5,7 @@ const platformCharges = require(__basedir + '/services/platform/charges')
 
 const exportsObj = {}
 
-exportsObj.calculateCharges = (initial, extras) => {
+exportsObj.calculateChargesList = (initial, extras) => {
   const proms = [
     platformCharges.getFees(true)
   ]
