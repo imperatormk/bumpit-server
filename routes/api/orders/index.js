@@ -3,6 +3,7 @@ const router = require('express').Router()
 const authMiddleware = require(__basedir + '/services/auth').middleware
 const db = require(__basedir + '/db/controllers')
 
+const paymentsService = require(__basedir + '/services/payments')
 const chargesService = require(__basedir + '/services/payments').charges
 const eventsService = require(__basedir + '/services/events')
 
@@ -16,45 +17,77 @@ router.get('/:id', (req, res, next) => {
     .catch(err => next(err))
 })
 
-const prepareOrder = (order) => {
+const prepareOrder = (order, mode) => { // here mode is a bit stiff but okay
+  const { userId, productId, extras, paymentToken } = order
+
   const checks = [
-    db.products.getProduct(order.productId),
-    db.shippingInfos.getShippingInfoForUser(order.userId)
+    db.products.getProduct(productId)
   ]
+  if (mode === 'create')
+    checks.push(db.shippingInfos.getShippingInfoForUser(userId))
+
   return Promise.all(checks)
     .then(([product, shippingInfo]) => {
       if (!product)
         throw { status: 400, msg: 'badProduct' }
-      if (product.selId === order.userId)
+      if (product.selId === userId)
         throw { status: 400, msg: 'cantBuyFromSelf' }
       if (product.status !== 'AVAILABLE')
         throw { status: 400, msg: 'productSold' }
-      if (!shippingInfo)
+      if (mode === 'create' && !shippingInfo)
         throw { status: 400, msg: 'noShippingInfo' }
 
-      const results = {
-        order: {
-          proId: product.id,
-          usrId: order.userId,
-          shippingInfo: JSON.stringify(shippingInfo),
-          status: 'PROCESSED'
-        },
-        charge: {
-          amount: product.price,
-          currency: product.currency,
-          card: order.paymentToken,
-          description: `Order for product #${order.productId}`
-        }
+      const charge = {
+        amount: product.price,
+        currency: product.currency
       }
-      return results
+
+      if (mode === 'create') { // so this might belong to another fn
+        const results = {
+          order: {
+            proId: product.id,
+            usrId: userId,
+            shippingInfo: JSON.stringify(shippingInfo),
+            status: 'PROCESSED'
+          },
+          charge: {
+            ...charge,
+            card: paymentToken,
+            description: `Order for product #${productId}`
+          }
+        }
+        return results
+      }
+
+      const initial = { ...charge }
+      const calculateCharges = paymentsService.calculateCharges(initial, extras)
+
+      return calculateCharges
+        .then((chargeList) => {
+          const results = {
+            chargeList
+          }
+          return results
+        })
     })
 }
 
-router.post('/', authMiddleware, (req, res, next) => { // here charge event is created
+router.post('/prepare', authMiddleware, (req, res, next) => {
+  const orderConfig = req.body
+  const userId = req.user.id
+
+  return prepareOrder({ ...orderConfig, userId }, 'prepare')
+    .then((results) => {
+      return res.send(results)
+    })
+    .catch(err => next(err))
+})
+
+router.post('/create', authMiddleware, (req, res, next) => {
   const order = req.body
   const userId = req.user.id
 
-  return prepareOrder({ ...order , userId })
+  return prepareOrder({ ...order , userId }, 'create')
     .then((results) => {
       const order = results.order
       const charge = results.charge
