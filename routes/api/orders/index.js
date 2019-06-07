@@ -26,7 +26,7 @@ const prepareOrder = (order, mode) => { // here mode is a bit stiff but okay
       if (chargeItem.percentage)
         amount = amount * (1 + (chargeItem.percentage) / 100)
     })
-    return amount.toFixed(2)
+    return Math.round(amount)
   }
 
   const { userId, productId, extras, paymentToken } = order

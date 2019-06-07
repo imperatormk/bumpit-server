@@ -24,6 +24,7 @@ exportsObj.calculateChargesList = (initial, extras) => {
       if (allExtras && allExtras.length) {
         const selExtras = allExtras
           .filter((extraObj) => extras.includes(extraObj.name))
+          .map((extraObj) => ({ ...extraObj, type: 'extra' }))
         charges.push(...selExtras)
       }
       return charges
