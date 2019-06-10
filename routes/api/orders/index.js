@@ -171,7 +171,8 @@ router.post('/create', authMiddleware, (req, res, next) => {
             .then((order) => {
               return res.send({
                 order,
-                chargesList: prepared.chargesList
+                chargesList: prepared.chargesList,
+                total: prepared.total
               })
             })
         })
