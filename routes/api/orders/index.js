@@ -100,8 +100,11 @@ router.post('/create', authMiddleware, (req, res, next) => {
   const order = req.body
   const userId = req.user.id
 
-  return prepareOrder({ ...order , userId }, 'create')
-    .then((results) => {
+  return Promise.all([
+    prepareOrder({ ...order , userId }, 'create'),
+    prepareOrder({ ...order , userId }, 'prepare')
+  ])
+    .then(([results, prepared]) => {
       const order = results.order
       const charge = results.charge
       console.log(charge)
@@ -163,7 +166,20 @@ router.post('/create', authMiddleware, (req, res, next) => {
         .then(() => {
           return db.products.updateProduct({ id: order.proId, status: 'SOLD' })
         })
-        .then(() => res.send({ success: true }))
+        .then(() => {
+          return db.products.getProduct(order.proId)
+        })
+        .then((product) => {
+          const { title, category, images } = product
+          return res.send({
+            product: {
+              title,
+              category,
+              images
+            },
+            chargesList: prepared.chargesList
+          })
+        })
         .catch(err => next(err)) // TODO: try to rollback any of the successes?
     })
     .catch(err => next(err))
