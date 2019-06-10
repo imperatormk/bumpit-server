@@ -107,7 +107,6 @@ router.post('/create', authMiddleware, (req, res, next) => {
     .then(([results, prepared]) => {
       const order = results.order
       const charge = results.charge
-      console.log(charge)
 
       // TODO: this HAS to be transactional
       return chargesService.chargeAmount(charge, userId)
@@ -163,22 +162,18 @@ router.post('/create', authMiddleware, (req, res, next) => {
             })
           // TODO: send mails here?
         })
-        .then(() => {
+        .then((event) => {
           return db.products.updateProduct({ id: order.proId, status: 'SOLD' })
+            .then(() => (event))
         })
-        .then(() => {
-          return db.products.getProduct(order.proId)
-        })
-        .then((product) => {
-          const { title, category, images } = product
-          return res.send({
-            product: {
-              title,
-              category,
-              images
-            },
-            chargesList: prepared.chargesList
-          })
+        .then((event) => {
+          return db.orders.getOrderById(event.ordId)
+            .then((order) => {
+              return res.send({
+                order,
+                chargesList: prepared.chargesList
+              })
+            })
         })
         .catch(err => next(err)) // TODO: try to rollback any of the successes?
     })

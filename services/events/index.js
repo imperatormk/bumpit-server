@@ -27,10 +27,11 @@ exportsObj.createEvent = (event) => {
   if (!validateEvent(event))
     return Promise.reject({ status: 400, msg: 'invalidEvent' })
   return db.events.insertEvent(event)
-    .then(() => {
+    .then((event) => {
       const nextState = moveToNextState(event.type)
       const orderId = event.ordId
       return db.orders.updateOrder({ status: nextState, id: orderId })
+        .then(() => (event))
     })
 }
 
