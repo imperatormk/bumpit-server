@@ -206,7 +206,7 @@ router.post('/:id/ship', authMiddleware, (req, res, next) => {
           }
           return eventsService.createEvent(event)
         })
-        .then(() => res.send({ success: true }))
+        .then(() => res.send({ status: 'success' }))
     })
     .catch(err => next(err))
 })
@@ -233,7 +233,7 @@ router.post('/:id/complete', authMiddleware, (req, res, next) => {
           }
           return eventsService.createEvent(event)
         })
-        .then(() => res.send({ success: true }))
+        .then(() => res.send({ status: 'success'  }))
     })
     .catch(err => next(err))
 })
@@ -269,7 +269,7 @@ router.post('/:id/refund', authMiddleware, (req, res, next) => {
           }
           return eventsService.createEvent(event)
         })
-        .then(() => res.send({ success: true }))
+        .then(() => res.send({ status: 'success'  }))
     })
     .catch(err => next(err))
 })

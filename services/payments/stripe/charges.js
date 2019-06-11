@@ -141,7 +141,7 @@ exportsObj.payoutFunds = (orderId, method) => {
           if (!result.status === 'success')
             return Promise.reject({ status: 500, msg: 'fundsPayoutFailed' })
           return db.charges.updateCharge({ id: charge.id, stage: data.nextStage })
-            .then(() => ({ success: true }))
+            .then(() => ({ status: 'success' }))
         })
     })
 }
