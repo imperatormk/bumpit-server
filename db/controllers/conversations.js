@@ -13,7 +13,7 @@ const getConversation = (conversation) => {
     }, {
       model: ChatMessage,
       as: 'messages',
-      order: [['id', 'DESC']],
+      order: [['id', 'ASC']],
       limit: 200
     }],
     where: {
