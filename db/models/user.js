@@ -7,8 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     surname: DataTypes.STRING,
     location: DataTypes.STRING,
     bio: DataTypes.TEXT,
-    email: DataTypes.TEXT,
-    phone: DataTypes.TEXT,
+    email: DataTypes.STRING,
+    phone: DataTypes.STRING,
     stripeCustId: DataTypes.STRING,
     rating: {
       type: DataTypes.VIRTUAL,

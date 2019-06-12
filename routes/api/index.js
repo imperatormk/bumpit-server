@@ -4,6 +4,7 @@ const ordersRoutes = require('./orders')
 const productsRoutes = require('./products')
 const authRoutes = require('./auth')
 const accountsRoutes = require('./accounts')
+const conversationsRoutes = require('./conversations')
 
 const checkEmptyBody = (req, res, next) => {
 	const body = req.body
@@ -28,5 +29,6 @@ router.use('/orders', ordersRoutes)
 router.use('/products', productsRoutes)
 router.use('/auth', authRoutes)
 router.use('/accounts', accountsRoutes)
+router.use('/conversations', conversationsRoutes)
 
 module.exports = router
