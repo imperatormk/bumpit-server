@@ -32,11 +32,11 @@ const getConversation = (conversation) => {
 }
 
 exportsObj.createOrGetConversation = (conversation) => {
-  const { usrId, ordId } = conversation
-  if (!usrId || !ordId)
+  const { usrId, proId } = conversation
+  if (!usrId || !proId)
     return Promise.reject({ status: 400, msg: 'invalidData' })
 
-  return getConversation({ usrId, ordId })
+  return getConversation({ usrId, proId })
     .then((existingConvo) => {
       if (!existingConvo)
         return Conversation.create(conversation)

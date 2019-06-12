@@ -5,9 +5,9 @@ const authMiddleware = require(__basedir + '/services/auth').middleware
 
 router.post('/', authMiddleware, (req, res, next) => { // TODO: check if convo with self!
   const usrId = req.user.id
-  const { ordId } = req.body
+  const { proId } = req.body
   
-  return db.conversations.createOrGetConversation({ ordId, usrId })
+  return db.conversations.createOrGetConversation({ proId, usrId })
     .then(conversation => res.send(conversation))
     .catch(err => next(err))
 })

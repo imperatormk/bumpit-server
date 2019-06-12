@@ -8,9 +8,9 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'cnvId',
       as: 'messages'
     })
-    Conversation.belongsTo(models.order, {
-      foreignKey: 'ordId',
-      as: 'order'
+    Conversation.belongsTo(models.product, {
+      foreignKey: 'proId',
+      as: 'product'
     })
     Conversation.belongsTo(models.user, {
       foreignKey: 'usrId',

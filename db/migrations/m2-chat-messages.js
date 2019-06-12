@@ -9,13 +9,13 @@ const conversations = (Sequelize) => ({
     type: Sequelize.INTEGER,
     defaultValue: 1
   },
-  ordId: {
+  proId: {
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
     references: {
-      model: 'orders',
+      model: 'products',
       key: 'id',
-      as: 'ordId'
+      as: 'proId'
     },
     allowNull: false
   },
