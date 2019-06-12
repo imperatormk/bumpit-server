@@ -34,7 +34,7 @@ const getConversation = (conversation) => {
 exportsObj.createOrGetConversation = (conversation) => {
   const { usrId, ordId } = conversation
   if (!usrId || !ordId)
-    return Promise.reject({ msg: 'invalidData' })
+    return Promise.reject({ status: 400, msg: 'invalidData' })
 
   return getConversation({ usrId, ordId })
     .then((existingConvo) => {
@@ -50,12 +50,18 @@ exportsObj.insertChatMessage = (chatMessage) => {
   const contentTrimmed = content.trim()
 
   if (!cnvId | !contentTrimmed)
-    return Promise.reject({ msg: 'invalidData' })
+    return Promise.reject({ status: 400, msg: 'invalidData' })
 
-	return ChatMessage.create({
-    ...chatMessage,
-    content: contentTrimmed
-  })
+  return getConversation({ id: cnvId })
+    .then((conversation) => {
+      if (!conversation)
+        return Promise.reject({ status: 400, msg: 'invalidData' })
+      return ChatMessage.create({
+        ...chatMessage,
+        cnvId,
+        content: contentTrimmed
+      })
+    })
 }
 
 module.exports = exportsObj

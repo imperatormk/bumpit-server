@@ -1,7 +1,7 @@
 'use strict'
 module.exports = (sequelize, DataTypes) => {
   const Conversation = sequelize.define('conversation', {
-  	open: DataTypes.BOOLEAN
+  	status: DataTypes.INTEGER
   })
   Conversation.associate = function(models) { // TODO: make cnvId + ordId unique
     Conversation.hasMany(models.chatMessage, {

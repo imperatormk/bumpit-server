@@ -5,9 +5,9 @@ const conversations = (Sequelize) => ({
     primaryKey: true,
     type: Sequelize.INTEGER
   },
-  open: {
-    type: Sequelize.BOOLEAN,
-    defaultValue: true
+  status: {
+    type: Sequelize.INTEGER,
+    defaultValue: 1
   },
   ordId: {
     type: Sequelize.INTEGER,
@@ -17,6 +17,7 @@ const conversations = (Sequelize) => ({
       key: 'id',
       as: 'ordId'
     },
+    allowNull: false
   },
   usrId: {
     type: Sequelize.INTEGER,
@@ -26,6 +27,7 @@ const conversations = (Sequelize) => ({
       key: 'id',
       as: 'usrId'
     },
+    allowNull: false
   },
   createdAt: {
 	  type: Sequelize.DATE,
@@ -45,10 +47,12 @@ const messages = (Sequelize) => ({
     type: Sequelize.INTEGER
   },
   content: {
-    type: Sequelize.TEXT
+    type: Sequelize.TEXT,
+    allowNull: false
   },
   fromBuyer: {
-    type: Sequelize.BOOLEAN
+    type: Sequelize.BOOLEAN,
+    defaultValue: false
   },
   cnvId: {
     type: Sequelize.INTEGER,
@@ -58,6 +62,7 @@ const messages = (Sequelize) => ({
       key: 'id',
       as: 'cnvId'
     },
+    allowNull: false
   },
   createdAt: {
 	  type: Sequelize.DATE,
