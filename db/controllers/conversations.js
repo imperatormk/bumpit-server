@@ -55,7 +55,7 @@ exportsObj.insertChatMessage = (chatMessage) => {
   return getConversation({ id: cnvId })
     .then((conversation) => {
       if (!conversation)
-        return Promise.reject({ status: 400, msg: 'invalidData' })
+        return Promise.reject({ status: 400, msg: 'noConversation' })
       return ChatMessage.create({
         ...chatMessage,
         cnvId,

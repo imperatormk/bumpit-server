@@ -12,4 +12,8 @@ require(__basedir + '/db')
 
 const server = http.createServer(app)
 server.listen(port)
+
+const io = require('socket.io')(server)
+app.io = io
+
 console.log('Started on port ' + port)

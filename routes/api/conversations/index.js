@@ -22,7 +22,10 @@ router.post('/:id', authMiddleware, (req, res, next) => {
     ...chatMessage,
     cnvId
   })
-    .then(msg => res.send(msg))
+    .then((msg) => {
+      req.app.io.emit('msgReceived', msg)
+      res.send(msg)
+    })
     .catch(err => next(err))
 })
 
