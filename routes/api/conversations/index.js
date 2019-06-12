@@ -88,7 +88,7 @@ router.post('/:id', authMiddleware, (req, res, next) => {
 
           return db.conversations.insertChatMessage(chatMessage)
             .then((msg) => {
-              req.app.io.sockets.in(`conv${cnvId}`).broadcast.emit('msgReceived', { ...msg, fromMe: false })
+              req.app.io.broadcast.to(`conv${cnvId}`).emit('msgReceived', { ...msg, fromMe: false })
               res.send({ ...msg, fromMe: true })
             })
         })
