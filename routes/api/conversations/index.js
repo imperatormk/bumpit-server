@@ -77,9 +77,9 @@ router.post('/:id', authMiddleware, (req, res, next) => {
       return db.products.getProduct(productId)
         .then((product) => {
           const sellerId = product.selId
-          if (conversation.usrId === sellerId) {
+          if (usrId === sellerId) {
             chatMessage.fromBuyer = false
-          } else if (conversation.usrId === usrId) {
+          } else if (usrId === conversation.usrId) {
             chatMessage.fromBuyer = true
           } else {
             throw { status: 400, msg: 'userDoesNotBelongToConv' }

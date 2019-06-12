@@ -7,7 +7,7 @@ const db = require(__basedir + '/db/controllers')
 const loginFn = (req, res, next) => {
   passport.authenticate('login', (err, user, info) => {
     if (err) return next(err)
-    if (info) return next(err)
+    if (info) return next(info)
     return req.logIn(user, (err) => {
       if (err) return next(err)
       return db.users.getUser({ id: user.id })
