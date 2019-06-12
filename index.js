@@ -16,4 +16,10 @@ server.listen(port)
 const io = require('socket.io')(server)
 app.io = io
 
+io.sockets.on('connection', (socket) => {
+  socket.on('joinConv', (conv) => {
+    socket.join(conv)
+  })
+})
+
 console.log('Started on port ' + port)

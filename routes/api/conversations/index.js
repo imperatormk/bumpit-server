@@ -23,7 +23,7 @@ router.post('/:id', authMiddleware, (req, res, next) => {
     cnvId
   })
     .then((msg) => {
-      req.app.io.emit('msgReceived', msg)
+      req.app.io.sockets.in(`conv${cnvId}`).emit('msgReceived', msg)
       res.send(msg)
     })
     .catch(err => next(err))
