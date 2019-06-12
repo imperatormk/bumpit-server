@@ -30,6 +30,7 @@ const getConversation = (conversation) => {
       }
     })
 }
+exportsObj.getConversation = getConversation
 
 exportsObj.createOrGetConversation = (conversation) => {
   const { usrId, proId } = conversation
@@ -60,7 +61,7 @@ exportsObj.insertChatMessage = (chatMessage) => {
         ...chatMessage,
         cnvId,
         content: contentTrimmed
-      })
+      }).then(msg => msg.toJSON())
     })
 }
 
