@@ -17,6 +17,12 @@ module.exports = {
       }, {
         name: 'Shoes'
       }], {})
+
+      const brands = queryInterface.bulkInsert('brands', [{
+        name: 'Nike'
+      }, {
+        name: 'Adidas'
+      }], {})
   
   	  const users = queryInterface.bulkInsert('users', [{
       	username: 'mr.mach',
@@ -44,7 +50,7 @@ module.exports = {
         updatedAt: Sequelize.fn('NOW') // temp
       }], {})
   
-  	  return Promise.all([categories, users]).then(() => {
+  	  return Promise.all([categories, brands, users]).then(() => {
         const shippingInfos = queryInterface.bulkInsert('shippingInfos',[{
           ...shippingInfoObj,
           usrId: 1
@@ -56,6 +62,7 @@ module.exports = {
         const products = queryInterface.bulkInsert('products', [{
           catId: 1,
           selId: 1,
+          brandId: 1,
           title: 'An underwear',
           details: 'Very well kept',
           condition: 2,
@@ -68,6 +75,7 @@ module.exports = {
         }, {
           catId: 2,
           selId: 1,
+          brandId: 2,
           title: 'A super shoe',
           details: 'This equals two',
           condition: 1,
@@ -80,6 +88,7 @@ module.exports = {
         }, {
           catId: 2,
           selId: 2,
+          brandId: 1,
           title: 'A shoe',
           details: 'Just one though',
           condition: 1,
@@ -160,8 +169,9 @@ module.exports = {
   },
   down: (queryInterface, Sequelize) => {
     const categories = queryInterface.bulkDelete('categories', null, {})
+    const brands = queryInterface.bulkDelete('brands', null, {})
     const users = queryInterface.bulkDelete('users', null, {})
-    return Promise.all([categories, users])
+    return Promise.all([categories, brands, users])
       .then(() => {
       const shippingInfos = queryInterface.bulkDelete('shippingInfos', null, {})
       const products = queryInterface.bulkDelete('products', null, {})

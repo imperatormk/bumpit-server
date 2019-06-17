@@ -13,6 +13,19 @@ const categories = (Sequelize) => ({
   }
 })
 
+const brands = (Sequelize) => ({
+  id: {
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+    type: Sequelize.INTEGER
+  },
+  name: {
+    type: Sequelize.STRING,
+    allowNull: false
+  }
+})
+
 const users = (Sequelize) => ({
   id: {
     allowNull: false,
@@ -129,7 +142,18 @@ const products = (Sequelize) => ({
       model: 'categories',
       key: 'id',
       as: 'catId'
-    }
+    },
+    allowNull: false
+  },
+  brandId: {
+    type: Sequelize.INTEGER,
+    onDelete: 'CASCADE',
+    references: {
+      model: 'brands',
+      key: 'id',
+      as: 'brandId'
+    },
+    allowNull: false
   },
   selId: {
     type: Sequelize.INTEGER,
@@ -138,7 +162,8 @@ const products = (Sequelize) => ({
       model: 'users',
       key: 'id',
       as: 'selId'
-    }
+    },
+    allowNull: false
   },
   title: {
     type: Sequelize.STRING,
@@ -604,8 +629,9 @@ module.exports = {
   up: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction((t) => {
       const categoriesP = queryInterface.createTable('categories', categories(Sequelize))
+      const brandsP = queryInterface.createTable('brands', brands(Sequelize))
       const usersP = queryInterface.createTable('users', users(Sequelize))
-      return Promise.all([categoriesP, usersP])
+      return Promise.all([categoriesP, brandsP, usersP])
         .then(() => {
           const shippingInfosP = queryInterface.createTable('shippingInfos', shippingInfos(Sequelize))
           const productsP = queryInterface.createTable('products', products(Sequelize))
@@ -663,8 +689,9 @@ module.exports = {
                   return Promise.all([productsP, connectionsP, shippingInfosP])
                     .then(() => {
                       const categoriesP = queryInterface.dropTable('categories')
+                      const brandsP = queryInterface.dropTable('brands')
                       const usersP = queryInterface.dropTable('users')
-                      return Promise.all([categoriesP, usersP])
+                      return Promise.all([categoriesP, brandsP, usersP])
                     })
                 })
             })
