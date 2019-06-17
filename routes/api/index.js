@@ -1,5 +1,7 @@
 const router = require('express').Router()
 
+const categoriesRoutes = require('./categories')
+const brandsRoutes = require('./brands')
 const ordersRoutes = require('./orders')
 const productsRoutes = require('./products')
 const authRoutes = require('./auth')
@@ -25,6 +27,8 @@ const convertToNumbers = (req, res, next) => {
 }
 router.use(convertToNumbers) // doesn't work atm
 
+router.use('/categories', categoriesRoutes)
+router.use('/brands', brandsRoutes)
 router.use('/orders', ordersRoutes)
 router.use('/products', productsRoutes)
 router.use('/auth', authRoutes)
