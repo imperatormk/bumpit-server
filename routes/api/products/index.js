@@ -22,7 +22,9 @@ router.get('/:id', (req, res, next) => {
 
 router.post('/', (req, res, next) => {
   const product = req.body
-
+  const userId = req.user.id
+  
+  product.selId = userId
   return db.products.insertProduct(product)
     .then(result => res.send(result))
     .catch(err => next(err))
@@ -37,14 +39,20 @@ router.post('/:id/images', uploadMdw.single('productImage'), (req, res, next) =>
   if (!productId || !productImageFile)
     throw { status: 400, msg: 'invalidImage' }
 
-  const productImage = {
-    url: productImageFile.filename,
-    proId: productId
-  }
+  return db.products.getProduct(productId)
+    .then((product) => {
+      if (!product)
+        throw { status: 404, msg: 'invalidProduct' }
 
-  return db.images.insertImage(productImage)
-    .then(result => res.send(result))
-    .catch(err => next(err))
+      const productImage = {
+        url: productImageFile.filename,
+        proId: productId
+      }
+
+      return db.images.insertImage(productImage)
+        .then(result => res.send(result))
+        .catch(err => next(err))
+    })
 })
 
 module.exports = router
