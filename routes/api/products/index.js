@@ -40,7 +40,7 @@ router.post('/:id/images', uploadMdw.single('productImage'), (req, res, next) =>
 
   if (!productId)
     throw { status: 400, msg: 'invalidProduct' }
-  if (!productId || !productImageFile)
+  if (!productImageFile)
     throw { status: 400, msg: 'invalidImage' }
 
   return db.products.getProduct(productId)
@@ -55,8 +55,28 @@ router.post('/:id/images', uploadMdw.single('productImage'), (req, res, next) =>
 
       return db.images.insertImage(productImage)
         .then(result => res.send(result))
-        .catch(err => next(err))
     })
+    .catch(err => next(err))
+})
+
+router.delete('/:id', authMiddleware, (req, res, next) => {
+  const productId = req.params.id
+  const seller = req.user
+
+  if (!productId)
+    throw { status: 400, msg: 'invalidProduct' }
+
+  return db.products.getProduct(productId)
+    .then((product) => {
+      if (!product)
+        throw { status: 404, msg: 'invalidProduct' }
+      if (!product.selId !== seller.id)
+        throw { status: 403, msg: 'foreignProduct' }
+
+      return db.images.deleteProduct(productId)
+        .then(result => res.send(result))
+    })
+    .catch(err => next(err))
 })
 
 module.exports = router
