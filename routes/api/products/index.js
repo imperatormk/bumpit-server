@@ -2,13 +2,13 @@ const router = require('express').Router()
 
 const db = require(__basedir + '/db/controllers')
 
-router.get('/', function(req, res) {
+router.get('/', (req, res) => {
   return db.products.getProducts()
     .then(products => res.send(products))
     .catch(err => next(err))
 })
 
-router.get('/:id', function(req, res, next) {
+router.get('/:id', (req, res, next) => {
   const id = req.params.id
   return db.products.getProduct(id)
     .then((product) => {
@@ -16,6 +16,41 @@ router.get('/:id', function(req, res, next) {
         throw { status: 404, msg: 'notFound' }
       return res.send(product)
     })
+    .catch(err => next(err))
+})
+
+router.post('/', (req, res, next) => {
+  const product = req.body
+
+  return db.products.insertProduct(product)
+    .then(result => res.send(result))
+    .catch(err => next(err))
+})
+
+router.post('/:id/images', (req, res, next) => {
+  const productId = req.params.id
+  const imageFile = req.files && req.files[0]
+  
+  if (!imageFile)
+    return next({ status: 400, msg: 'noFile' })
+  
+  const productImagesPath = helpers.getStoragePath('productImages')
+
+  const file = imageFiles[fileKey]
+  const storagePromise = helpers.saveFile(file, productImagesPath)
+  
+  const getImageData = (storageObj) => {
+    return {
+      url: storageObj.filename,
+      featured: false,
+      proId: productId
+    }
+  }
+
+  return storagePromise
+    .then(storageObj => getImageData({ ...storageObj }))
+    .then(productImage => db.images.insertImage(productImage))
+    .then(result => res.send(result))
     .catch(err => next(err))
 })
 
