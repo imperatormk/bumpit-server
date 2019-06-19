@@ -26,6 +26,8 @@ router.post('/', authMiddleware, (req, res, next) => {
   const userId = req.user.id
   
   product.selId = userId
+  product.price = product.price * 100 // convert to cents
+
   return db.products.insertProduct(product)
     .then(result => res.send(result))
     .catch(err => next(err))
