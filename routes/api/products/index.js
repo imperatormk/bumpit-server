@@ -30,32 +30,19 @@ router.post('/', (req, res, next) => {
 
 router.post('/:id/images', uploadMdw.single('productImage'), (req, res, next) => {
   const productId = req.params.id
-  console.log(productId, req.file)
-})
+  const productImageFile = req.file
 
-router.post('/:id/images/temp', (req, res, next) => {
-  const productId = req.params.id
-  const imageFile = req.files && req.files[0]
-  
-  if (!imageFile)
-    return next({ status: 400, msg: 'noFile' })
-  
-  const productImagesPath = helpers.getStoragePath('productImages')
+  if (!productId)
+    throw { status: 400, msg: 'invalidProduct' }
+  if (!productId || !productImageFile)
+    throw { status: 400, msg: 'invalidImage' }
 
-  const file = imageFiles[fileKey]
-  const storagePromise = helpers.saveFile(file, productImagesPath)
-  
-  const getImageData = (storageObj) => {
-    return {
-      url: storageObj.filename,
-      featured: false,
-      proId: productId
-    }
+  const productImage = {
+    url: productImageFile.filename,
+    proId: productId
   }
 
-  return storagePromise
-    .then(storageObj => getImageData({ ...storageObj }))
-    .then(productImage => db.images.insertImage(productImage))
+  return db.images.insertImage(productImage)
     .then(result => res.send(result))
     .catch(err => next(err))
 })
