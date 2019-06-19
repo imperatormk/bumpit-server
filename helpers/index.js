@@ -25,19 +25,25 @@ exportsObj.saveFile = (file, dir) => {
 
 const multer  = require('multer')
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, '/home/ec2-user/storage/laced/productImages')
-  },
-  filename: (req, file, cb) => {
-    crypto.pseudoRandomBytes(16, (err, raw) => {
-      cb(null, raw.toString('hex') + Date.now() + '.' + mime.getExtension(file.mimetype))
-    })
-  }
-})
-const upload = multer({ storage: storage })
+const upload = (subFolder) => {
+  if (!subFolder) throw { status: 'subfolder_missing' }
 
-exportsObj.uploadMdw = upload
+  const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+      const storagePath = path.join(process.env.APP_STORAGE_PATH, subFolder)
+      cb(null, storagePath)
+    },
+    filename: (req, file, cb) => {
+      crypto.pseudoRandomBytes(16, (err, raw) => {
+        cb(null, raw.toString('hex') + Date.now() + '.' + mime.getExtension(file.mimetype))
+      })
+    }
+  })
+
+  return multer({ storage: storage })
+}
+
+exportsObj.uploadMiddleware = upload
 
 /* ---------------------------------------------- */
 

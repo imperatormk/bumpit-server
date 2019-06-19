@@ -1,6 +1,6 @@
 const router = require('express').Router()
 
-const uploadMdw = require(__basedir + '/helpers').uploadMdw
+const uploadMiddleware = require(__basedir + '/helpers').uploadMiddleware
 const authMiddleware = require(__basedir + '/services/auth').middleware
 const db = require(__basedir + '/db/controllers')
 
@@ -34,7 +34,7 @@ router.post('/', authMiddleware, (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.post('/:id/images', uploadMdw.single('productImage'), (req, res, next) => {
+router.post('/:id/images', uploadMiddleware('productImages').single('productImage'), (req, res, next) => {
   const productId = req.params.id
   const productImageFile = req.file
 
