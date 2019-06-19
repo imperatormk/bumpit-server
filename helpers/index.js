@@ -19,6 +19,14 @@ exportsObj.saveFile = (file, dir) => {
   })
 }
 
+/* ---------------------------------------------- */
+
+const multer  = require('multer')
+const upload = multer({ dest: '/home/ec2-user/storage/laced/productImages' })
+exportsObj.uploadMdw = upload
+
+/* ---------------------------------------------- */
+
 const getStoragePath = (key) => {
   const baseStoragePath = constants.appStoragePath
   return path.join(baseStoragePath, key)

@@ -1,5 +1,6 @@
 const router = require('express').Router()
 
+const uploadMwd = require(__basedir + '/helpers').uploadMwd
 const db = require(__basedir + '/db/controllers')
 
 router.get('/', (req, res) => {
@@ -27,7 +28,12 @@ router.post('/', (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.post('/:id/images', (req, res, next) => {
+router.post('/:id/images', uploadMwd.single('productImage'), (req, res, next) => {
+  const productId = req.params.id
+  console.log(productId, req.file)
+})
+
+router.post('/:id/images/temp', (req, res, next) => {
   const productId = req.params.id
   const imageFile = req.files && req.files[0]
   
