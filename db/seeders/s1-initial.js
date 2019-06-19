@@ -59,47 +59,6 @@ module.exports = {
           usrId: 2
         }], {})
 
-        const products = queryInterface.bulkInsert('products', [{
-          catId: 1,
-          selId: 1,
-          brandId: 1,
-          title: 'An underwear',
-          details: 'Very well kept',
-          condition: 2,
-          price: 119,
-          currency: 'EUR',
-          size: 'Test size A',
-          location: 'U Home',
-          createdAt: Sequelize.fn('NOW'), // temp
-          updatedAt: Sequelize.fn('NOW') // temp
-        }, {
-          catId: 2,
-          selId: 1,
-          brandId: 2,
-          title: 'A super shoe',
-          details: 'This equals two',
-          condition: 1,
-          price: 589,
-          currency: 'AUD',
-          size: 'Test size C',
-          location: 'SS Home',
-          createdAt: Sequelize.fn('NOW'), // temp
-          updatedAt: Sequelize.fn('NOW') // temp
-        }, {
-          catId: 2,
-          selId: 2,
-          brandId: 1,
-          title: 'A shoe',
-          details: 'Just one though',
-          condition: 1,
-          price: 449,
-          currency: 'USD',
-          size: 'Test size B',
-          location: 'S Home',
-          createdAt: Sequelize.fn('NOW'), // temp
-          updatedAt: Sequelize.fn('NOW') // temp
-        }], {})
-
         const connections = queryInterface.bulkInsert('connections', [{
           usrFromId: 1,
           usrToId: 2,
@@ -112,59 +71,7 @@ module.exports = {
           updatedAt: Sequelize.fn('NOW') // temp
         }], {})
 
-      	return Promise.all([shippingInfos, products, connections]).then(() => {
-      	  const images = queryInterface.bulkInsert('images', [{
-            proId: 1,
-            url: 'https://via.placeholder.com/500x300',
-          }, {
-            proId: 2,
-            url: 'https://via.placeholder.com/400x600',
-          }, {
-            proId: 3,
-            url: 'https://via.placeholder.com/400x400',
-          }], {})
-          
-          const reviews = queryInterface.bulkInsert('reviews', [{
-            usrId: 1,
-            proId: 1,
-            rating: 2,
-            message: 'Not very well kept',
-            createdAt: Sequelize.fn('NOW'), // temp
-            updatedAt: Sequelize.fn('NOW') // temp
-          }, {
-            usrId: 2,
-            proId: 2,
-            rating: 3,
-            message: 'Not bad for a single shoe',
-            createdAt: Sequelize.fn('NOW'), // temp
-            updatedAt: Sequelize.fn('NOW') // temp
-          }], {})
-
-          const likes = queryInterface.bulkInsert('likes', [{
-            usrId: 1,
-            proId: 2,
-            createdAt: Sequelize.fn('NOW'), // temp
-            updatedAt: Sequelize.fn('NOW') // temp
-          }], {})
-
-          const orders = queryInterface.bulkInsert('orders', [{
-            usrId: 1,
-            proId: 1,
-            shippingInfo: JSON.stringify(shippingInfoObj),
-            status: 'PROCESSING',
-            createdAt: Sequelize.fn('NOW'), // temp
-            updatedAt: Sequelize.fn('NOW') // temp
-          }, {
-            usrId: 1,
-            proId: 3,
-            shippingInfo: JSON.stringify(shippingInfoObj),
-            status: 'PROCESSING',
-            createdAt: Sequelize.fn('NOW'), // temp
-            updatedAt: Sequelize.fn('NOW') // temp
-          }], {})
-
-          return Promise.all([images, reviews, likes, orders])
-        })
+      	return Promise.all([shippingInfos, connections])
       })
   },
   down: (queryInterface, Sequelize) => {
@@ -174,15 +81,11 @@ module.exports = {
     return Promise.all([categories, brands, users])
       .then(() => {
       const shippingInfos = queryInterface.bulkDelete('shippingInfos', null, {})
-      const products = queryInterface.bulkDelete('products', null, {})
       const connections = queryInterface.bulkDelete('connections', null, {})
-      return Promise.all([shippingInfos, products, connections])
+      return Promise.all([shippingInfos, connections])
         .then(() => {
-          const images = queryInterface.bulkDelete('images', null, {})
           const reviews = queryInterface.bulkDelete('reviews', null, {})
-          const likes = queryInterface.bulkDelete('likes', null, {})
-          const orders = queryInterface.bulkDelete('orders', null, {})
-          return Promise.all([images, reviews, likes, orders])
+          return Promise.all([reviews])
         })
       })
   }
