@@ -22,7 +22,19 @@ exportsObj.saveFile = (file, dir) => {
 /* ---------------------------------------------- */
 
 const multer  = require('multer')
-const upload = multer({ dest: '/home/ec2-user/storage/laced/productImages' })
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, '/home/ec2-user/storage/laced/productImages')
+  },
+  filename: (req, file, cb) => {
+    crypto.pseudoRandomBytes(16, (err, raw) => {
+      cb(null, raw.toString('hex') + Date.now() + '.' + mime.extension(file.mimetype))
+    })
+  }
+})
+const upload = multer({ storage: storage })
+
 exportsObj.uploadMdw = upload
 
 /* ---------------------------------------------- */
