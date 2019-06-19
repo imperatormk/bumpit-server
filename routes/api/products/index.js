@@ -1,6 +1,7 @@
 const router = require('express').Router()
 
 const uploadMdw = require(__basedir + '/helpers').uploadMdw
+const authMiddleware = require(__basedir + '/services/auth').middleware
 const db = require(__basedir + '/db/controllers')
 
 router.get('/', (req, res) => {
@@ -20,7 +21,7 @@ router.get('/:id', (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.post('/', (req, res, next) => {
+router.post('/', authMiddleware, (req, res, next) => {
   const product = req.body
   const userId = req.user.id
   
