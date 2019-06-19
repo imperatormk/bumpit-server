@@ -23,10 +23,11 @@ router.get('/:id', (req, res, next) => {
 
 router.post('/', authMiddleware, (req, res, next) => {
   const product = req.body
-  const userId = req.user.id
+  const seller = req.user
   
-  product.selId = userId
   product.price = product.price * 100 // convert to cents
+  product.selId = seller.id
+  product.location = seller.location
 
   return db.products.insertProduct(product)
     .then(result => res.send(result))
