@@ -65,12 +65,13 @@ router.delete('/:id', authMiddleware, (req, res, next) => {
 
   if (!productId)
     throw { status: 400, msg: 'invalidProduct' }
+  console.log(productId.selId, seller.id)
 
   return db.products.getProduct(productId)
     .then((product) => {
       if (!product)
         throw { status: 404, msg: 'invalidProduct' }
-      if (!product.selId !== seller.id)
+      if (product.selId !== seller.id)
         throw { status: 403, msg: 'foreignProduct' }
 
       return db.images.deleteProduct(productId)
