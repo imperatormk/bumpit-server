@@ -1,6 +1,7 @@
 const exportsObj = {}
 const path = require('path')
 const constants = require('../config/constants')
+const crypto = require('crypto')
 
 const generateFilename = (origFilename) => {
   const filename = getRandomStrings(10)
