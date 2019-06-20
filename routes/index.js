@@ -15,7 +15,7 @@ router.get('/', (req, res) => {
   })
 })
 
-const staticFiles = ['productImages']
+const staticFiles = ['productImages', 'avatars']
 staticFiles.forEach((staticFile) => {
   const staticPath = helpers.getStaticFilesPath(staticFile)
   const storagePath = helpers.getStoragePath(staticFile)
