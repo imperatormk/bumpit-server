@@ -24,7 +24,12 @@ const upload = (subFolder) => {
     }
   })
 
-  return multer({ storage: storage })
+  return multer({
+    storage: storage,
+    limits: {
+      fieldSize: 4194304
+    }
+  })
 }
 exportsObj.uploadMiddleware = upload
 
