@@ -3,6 +3,7 @@ const router = require('express').Router()
 const db = require(__basedir + '/db/controllers')
 const registerService = require(__basedir + '/services/accounts').register
 const authMiddleware = require(__basedir + '/services/auth').middleware
+const uploadMiddleware = require(__basedir + '/helpers').uploadMiddleware
 
 router.post('/register', (req, res, next) => {
   const user = req.body
@@ -19,6 +20,15 @@ router.get('/:id', (req, res, next) => {
       if (!user) throw { status: 404, msg: 'userNotFound' }
       return res.send(user)
     })
+    .catch(err => next(err))
+})
+
+router.post('/me/avatar', authMiddleware, uploadMiddleware('avatars').single('avatar'), (req, res, next) => {
+  const userId = req.user.id
+  const avatar = req.file.filename
+
+  return db.users.updateAvatar(userId, avatar)
+    .then((avatar) => res.json({ avatar }))
     .catch(err => next(err))
 })
 

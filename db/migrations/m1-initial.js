@@ -35,6 +35,10 @@ const users = (Sequelize) => ({
   },
   username: {
     type: Sequelize.STRING,
+    allowNull: true
+  },
+  username: {
+    type: Sequelize.STRING,
     allowNull: false,
     unique: true
   },

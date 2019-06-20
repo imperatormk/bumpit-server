@@ -38,6 +38,11 @@ exportsObj.insertUser = (user) => {
 		.then(user => exportsObj.getUserById(user.id))
 }
 
+exportsObj.updateAvatar = (userId, avatar) => {
+	return User.update({ id: userId, avatar }, options)
+		.then({ avatar })
+}
+
 exportsObj.updateUser = (user) => {
 	const options = {
 		where: { id: user.id }

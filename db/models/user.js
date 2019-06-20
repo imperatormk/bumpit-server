@@ -1,6 +1,16 @@
 'use strict'
+const helpers = require(__basedir + '/helpers')
+
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define('user', {
+    avatar: {
+      type: DataTypes.STRING,
+      get() {
+        const value = this.getDataValue('avatar')
+        if (!value) return helpers.getStaticFilesUrl('system', 'default_avatar.png')
+        return helpers.getStaticFilesUrl('avatars', value)
+      }
+    },
     username: DataTypes.STRING,
     password: DataTypes.STRING,
     name: DataTypes.STRING,
