@@ -34,9 +34,10 @@ router.post('/', authMiddleware, (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.post('/:id/images', uploadMiddleware('productImages').single('productImage'), (req, res, next) => {
+router.post('/:id/images', authMiddleware, uploadMiddleware('productImages').single('productImage'), (req, res, next) => {
   const productId = req.params.id
   const productImageFile = req.file
+  const seller = req.user
 
   if (!productId)
     throw { status: 400, msg: 'invalidProduct' }
@@ -47,6 +48,8 @@ router.post('/:id/images', uploadMiddleware('productImages').single('productImag
     .then((product) => {
       if (!product)
         throw { status: 404, msg: 'invalidProduct' }
+      if (product.selId !== seller.id)
+        throw { status: 403, msg: 'foreignProduct' }
 
       const productImage = {
         url: productImageFile.filename,
