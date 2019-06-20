@@ -33,7 +33,7 @@ const users = (Sequelize) => ({
     primaryKey: true,
     type: Sequelize.INTEGER
   },
-  username: {
+  avatar: {
     type: Sequelize.STRING,
     allowNull: true
   },
