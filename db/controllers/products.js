@@ -4,8 +4,11 @@ const Product = require('../models').product
 const Image = require('../models').image
 const User = require('../models').user
 
-exportsObj.getProducts = () => {
+exportsObj.getProducts = (config) => {
 	const options = {}
+	const filter = config.filter || {}
+	options.where = filter
+
 	return Product.findAll(options)
 }
 

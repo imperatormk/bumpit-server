@@ -5,13 +5,26 @@ const authMiddleware = require(__basedir + '/services/auth').middleware
 const db = require(__basedir + '/db/controllers')
 
 router.get('/', (req, res) => {
-  return db.products.getProducts()
+  const config = {}
+
+  // TODO: move this to helpers the next time it's needed
+  const filter = req.query
+  Object.keys(filter)
+    .forEach((key) => {
+      const val = filter[key]
+      const newVal = !isNaN(Number(val)) ? Number(val) : val
+      filter[key] = newVal
+    })
+  config.filter = filter
+
+  return db.products.getProducts(config)
     .then(products => res.send(products))
     .catch(err => next(err))
 })
 
 router.get('/:id', (req, res, next) => {
   const id = req.params.id
+
   return db.products.getProduct(id)
     .then((product) => {
       if (!product)
