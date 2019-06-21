@@ -42,9 +42,9 @@ const prepareOrder = (order, mode) => { // here mode is a bit stiff but okay
       if (!product)
         throw { status: 400, msg: 'badProduct' }
       if (product.selId === userId)
-        throw { status: 400, msg: 'cantBuyFromSelf' }
+        throw { status: 409, msg: 'cantBuyFromSelf' }
       if (product.status !== 'AVAILABLE')
-        throw { status: 400, msg: 'productSold' }
+        throw { status: 409, msg: 'productSold' }
       if (mode === 'create' && !shippingInfo)
         throw { status: 400, msg: 'noShippingInfo' }
 

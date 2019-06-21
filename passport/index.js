@@ -15,10 +15,10 @@ passport.use('login', new LocalStrategy({
 }, (username, password, next) => {
   return db.users.getUser({ username }, true)
     .then((user) => {
-      if (!user) return next(null, false, { status: 401, msg: 'badUsername' })
+      if (!user) return next(null, false, { status: 400, msg: 'badUsername' })
       return bcrypt.compare(password, user.password)
         .then((response) => {
-          if (!response) return next(null, false, { status: 401, msg: 'badPassword' })
+          if (!response) return next(null, false, { status: 400, msg: 'badPassword' })
           return next(null, user.toJSON())
         })
     })
