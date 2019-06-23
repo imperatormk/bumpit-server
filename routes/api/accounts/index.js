@@ -12,7 +12,7 @@ router.post('/register', (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.get('/:id', (req, res, next) => {
+router.get('/:id', authMiddleware, (req, res, next) => {
   const userId = req.params.id
 
   return db.users.getUserById(userId) // DRY!
