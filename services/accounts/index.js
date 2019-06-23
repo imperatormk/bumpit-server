@@ -45,7 +45,7 @@ exportsObj.register = (user) => {
   if (!sanitizationResult) 
     return Promise.reject({ status: 400, msg: 'emptyUser' })
   if (sanitizationResult.badFields) 
-    return Promise.reject({ status: 400, msg: 'invalidFields', details: sanitizedUser.badFields })
+    return Promise.reject({ status: 400, msg: 'invalidFields', details: sanitizationResult.badFields })
 
   const sanitizedUser = sanitizationResult.user
   return checkDuplicateValues(sanitizedUser)
