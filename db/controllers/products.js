@@ -1,15 +1,39 @@
 const exportsObj = {}
 
 const Product = require('../models').product
-const Image = require('../models').image
 const User = require('../models').user
 
+const getPagination = (pageData) => {
+  const limit = pageData.size || 100
+	const page = pageData.page || 1
+	const by = pageData.by || 'id'
+	const order = pageData.order || 'ASC'
+	
+	const options = {
+    limit,
+    offset: limit * (page - 1),
+		order: [[by, order]],
+  }
+  return options
+}
+
 exportsObj.getProducts = (config) => {
-	const options = {}
 	const filter = config.filter || {}
-	options.where = filter
+	const pageData = config.pageData || {}
+
+	const options = {
+		where: filter,
+		...getPagination(pageData)
+	}
 
 	return Product.findAll(options)
+		.then((products) => {
+			return Product.count({ where: filter })
+				.then((count) => ({
+					totalElements: count,
+					content: products
+				}))
+		})
 }
 
 exportsObj.getProduct = (productId) => {

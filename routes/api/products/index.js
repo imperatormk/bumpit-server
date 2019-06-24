@@ -4,11 +4,17 @@ const uploadMiddleware = require(__basedir + '/helpers').uploadMiddleware
 const authMiddleware = require(__basedir + '/services/auth').middleware
 const db = require(__basedir + '/db/controllers')
 
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
   const config = {}
 
   // TODO: move this to helpers the next time it's needed
-  const filter = req.query
+  const { page, size, by, order } = req.query
+  config.pageData = { page, size, by, order }
+
+  const filter = {}
+  const filterKeys = Object.keys(req.query).filter(key => !['page', 'size', 'by', 'order'].includes(key))
+  filterKeys.forEach(key => filter[key] = req.query[key])
+
   Object.keys(filter)
     .forEach((key) => {
       const val = filter[key]
