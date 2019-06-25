@@ -14,6 +14,12 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 app.use(passport.initialize())
 
+const force200Responses = (req, res, next) => {
+  req.headers['if-none-match'] = 'no-match-for-this'
+  next()
+}
+app.use(force200Responses)
+
 app.use('/', routes)
 
 module.exports = app
