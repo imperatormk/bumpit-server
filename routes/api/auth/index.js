@@ -1,7 +1,9 @@
+// TODO: move everything besides login to separate /user
 const router = require('express').Router()
 
 const db = require(__basedir + '/db/controllers')
 const authMiddleware = require(__basedir + '/services/auth').middleware
+const uploadMiddleware = require(__basedir + '/helpers').uploadMiddleware
 const login = require(__basedir + '/services/auth').login
 
 router.get('/user', authMiddleware, (req, res, next) => {
@@ -45,10 +47,19 @@ router.post('/user/shippingInfo', authMiddleware, (req, res, next) => { // TODO:
         ...data
       }
       return db.shippingInfos.updateShippingInfo(shippingInfoObj)
-        .then((result) => {
+        .then(() => {
           return res.send({ status: 'success' })
         })
     })
+    .catch(err => next(err))
+})
+
+router.post('/user/avatar', authMiddleware, uploadMiddleware('avatars').single('avatar'), (req, res, next) => {
+  const userId = req.user.id
+  const avatar = req.file.filename
+
+  return db.users.updateAvatar(userId, avatar)
+    .then((avatar) => res.json({ avatar }))
     .catch(err => next(err))
 })
 
