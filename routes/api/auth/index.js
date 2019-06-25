@@ -4,7 +4,7 @@ const db = require(__basedir + '/db/controllers')
 const authMiddleware = require(__basedir + '/services/auth').middleware
 const login = require(__basedir + '/services/auth').login
 
-router.get('/user', authMiddleware, (req, res) => {
+router.get('/user', authMiddleware, (req, res, next) => {
   const user = JSON.parse(JSON.stringify(req.user))
   const { includeSettings } = req.query
   const settingsPromise = !!includeSettings ? db.users.getUserSettings(user.id) : Promise.resolve()
@@ -14,6 +14,14 @@ router.get('/user', authMiddleware, (req, res) => {
       if (userSettings) userObj.settings = { ...userSettings }
       return res.send(userObj)
     })
+    .catch(err => next(err))
+})
+
+router.post('/user/settings', authMiddleware, (req, res, next) => {
+  const settings = req.body
+  return db.users.updateUserSettings(req.user.id, settings)
+    .then(result => res.json(result))
+    .catch(err => next(err))
 })
 
 router.get('/user/shippingInfo', authMiddleware, (req, res) => { // TODO: move this
@@ -22,9 +30,10 @@ router.get('/user/shippingInfo', authMiddleware, (req, res) => { // TODO: move t
     .then((shippingInfo) => {
       res.send(shippingInfo)
     })
+    .catch(err => next(err))
 })
 
-router.post('/user/shippingInfo', authMiddleware, (req, res) => { // TODO: move this
+router.post('/user/shippingInfo', authMiddleware, (req, res, next) => { // TODO: move this
   const userId = req.user.id
   const data = req.body
 
@@ -40,6 +49,7 @@ router.post('/user/shippingInfo', authMiddleware, (req, res) => { // TODO: move 
           return res.send({ status: 'success' })
         })
     })
+    .catch(err => next(err))
 })
 
 router.post('/login', login)

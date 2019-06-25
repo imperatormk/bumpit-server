@@ -47,7 +47,7 @@ exportsObj.insertUser = (user) => {
 }
 
 exportsObj.insertUserSettings = (usrId, userSetting) => {
-	return UserSettings
+	return UserSetting
 		.create({ ...userSetting, usrId })
 }
 
@@ -63,7 +63,7 @@ exportsObj.updateUserSettings = (usrId, settings) => {
 	const options = {
 		where: { usrId }
 	}
-	return User.update(settings, options)
+	return UserSetting.update(settings, options)
 		.then(() => exportsObj.getUserSettings(usrId))
 }
 
