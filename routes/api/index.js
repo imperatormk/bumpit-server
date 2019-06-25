@@ -1,12 +1,13 @@
 const router = require('express').Router()
 
-const categoriesRoutes = require('./categories')
+const accountsRoutes = require('./accounts')
+const authRoutes = require('./auth')
 const brandsRoutes = require('./brands')
+const categoriesRoutes = require('./categories')
+const conversationsRoutes = require('./conversations')
 const ordersRoutes = require('./orders')
 const productsRoutes = require('./products')
-const authRoutes = require('./auth')
-const accountsRoutes = require('./accounts')
-const conversationsRoutes = require('./conversations')
+const userRoutes = require('./user')
 
 const checkEmptyBody = (req, res, next) => {
 	const body = req.body
@@ -27,12 +28,13 @@ const convertToNumbers = (req, res, next) => {
 }
 router.use(convertToNumbers) // doesn't work atm
 
-router.use('/categories', categoriesRoutes)
+router.use('/accounts', accountsRoutes)
+router.use('/auth', authRoutes)
 router.use('/brands', brandsRoutes)
+router.use('/categories', categoriesRoutes)
+router.use('/conversations', conversationsRoutes)
 router.use('/orders', ordersRoutes)
 router.use('/products', productsRoutes)
-router.use('/auth', authRoutes)
-router.use('/accounts', accountsRoutes)
-router.use('/conversations', conversationsRoutes)
+router.use('/user', userRoutes)
 
 module.exports = router
