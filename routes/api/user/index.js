@@ -19,14 +19,14 @@ router.get('/', authMiddleware, (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.post('//settings', authMiddleware, (req, res, next) => {
+router.post('/settings', authMiddleware, (req, res, next) => {
   const settings = req.body
   return db.users.updateUserSettings(req.user.id, settings)
     .then(result => res.json(result))
     .catch(err => next(err))
 })
 
-router.get('//shippingInfo', authMiddleware, (req, res) => { // TODO: move this
+router.get('/shippingInfo', authMiddleware, (req, res) => { // TODO: move this
   const userId = req.user.id
   return db.shippingInfos.getShippingInfoForUser(userId)
     .then((shippingInfo) => {
@@ -35,7 +35,7 @@ router.get('//shippingInfo', authMiddleware, (req, res) => { // TODO: move this
     .catch(err => next(err))
 })
 
-router.post('//shippingInfo', authMiddleware, (req, res, next) => { // TODO: move this
+router.post('/shippingInfo', authMiddleware, (req, res, next) => { // TODO: move this
   const userId = req.user.id
   const data = req.body
 
@@ -54,7 +54,7 @@ router.post('//shippingInfo', authMiddleware, (req, res, next) => { // TODO: mov
     .catch(err => next(err))
 })
 
-router.post('//avatar', authMiddleware, uploadMiddleware('avatars').single('avatar'), (req, res, next) => {
+router.post('/avatar', authMiddleware, uploadMiddleware('avatars').single('avatar'), (req, res, next) => {
   const userId = req.user.id
   const avatar = req.file.filename
 
