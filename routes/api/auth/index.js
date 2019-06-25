@@ -5,7 +5,15 @@ const authMiddleware = require(__basedir + '/services/auth').middleware
 const login = require(__basedir + '/services/auth').login
 
 router.get('/user', authMiddleware, (req, res) => {
-  return res.send(req.user)
+  const user = JSON.parse(JSON.stringify(req.user))
+  const { includeSettings } = req.query
+  const settingsPromise = !!includeSettings ? db.users.getUserSettings(user.id) : Promise.resolve()
+  return settingsPromise
+    .then((userSettings) => {
+      const userObj = { ...user }
+      if (userSettings) userObj.settings = { ...userSettings }
+      return res.send(userObj)
+    })
 })
 
 router.get('/user/shippingInfo', authMiddleware, (req, res) => { // TODO: move this

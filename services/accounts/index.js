@@ -58,6 +58,19 @@ exportsObj.register = (user) => {
           .then(stripeCustomer => ({ ...user, stripeCustId: stripeCustomer.id }))
         )
         .then(user => db.users.insertUser(user))
+        .then((user) => {
+          const userSetting = {
+            disableTrades: false,
+            language: 'EN',
+            currency: 'USD',
+            notifOnLike: false,
+            notifOnFollow: false,
+            notifOnFriendPost: false,
+            usrId
+          }
+          return db.users.insertUserSettings(userSetting)
+            .then(() => user)
+        })
     })
 }
 

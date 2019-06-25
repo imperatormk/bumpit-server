@@ -10,6 +10,15 @@ const shippingInfoObj = {
   contactPhone: '070-727-051'
 }
 
+const userSettingObj = {
+  disableTrades: false,
+  language: 'EN',
+  currency: 'USD',
+  notifOnLike: false,
+  notifOnFollow: false,
+  notifOnFriendPost: false
+}
+
 module.exports = {
   up: (queryInterface, Sequelize) => {
       const categories = queryInterface.bulkInsert('categories', [{
@@ -51,6 +60,14 @@ module.exports = {
       }], {})
   
   	  return Promise.all([categories, brands, users]).then(() => {
+        const userSettings = queryInterface.bulkInsert('userSettings',[{
+          ...userSettingObj,
+          usrId: 1
+        }, {
+          ...userSettingObj,
+          usrId: 2
+        }], {})
+
         const shippingInfos = queryInterface.bulkInsert('shippingInfos',[{
           ...shippingInfoObj,
           usrId: 1
@@ -71,7 +88,7 @@ module.exports = {
           updatedAt: Sequelize.fn('NOW') // temp
         }], {})
 
-      	return Promise.all([shippingInfos, connections])
+      	return Promise.all([userSettings, shippingInfos, connections])
       })
   },
   down: (queryInterface, Sequelize) => {
