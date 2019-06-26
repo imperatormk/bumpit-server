@@ -3,14 +3,32 @@ const router = require('express').Router()
 const db = require(__basedir + '/db/controllers')
 const authMiddleware = require(__basedir + '/services/auth').middleware
 
-router.get('/:proId', (req, res, next) => {
-  const proId = req.params.proId
+router.get('/', (req, res, next) => { // so we use this for many purposes, filtering and different models
+  const { proId, likerId, likeeId } = req.query
 
-  return db.likes.getLikesForProduct(proId)
-    .then((likes) => {
-      return res.send(likes)
-    })
-    .catch(err => next(err))
+  /*
+    - proId: get likes for product
+    - likerId: get likes by user
+    - likeeId: get likes to user
+  */
+
+  if (proId || likerId || likeeId) {
+    let queryPromise = null
+    if (proId) {
+      queryPromise = db.likes.getLikesForProduct(proId)
+    } else if (likerId) {
+      queryPromise = db.likes.getUserLikes(likerId)
+    } else if (likeeId) {
+      queryPromise = db.likes.getLikesToUser(likeeId)
+    } else {
+      queryPromise = Promise.reject({ status: 400, msg: 'invalidParams' })
+    }
+
+    return queryPromise
+      .then(results => res.send(results))
+      .catch(err => next(err))
+  }
+  return next({ status: 400, msg: 'invalidParams' })
 })
 
 router.post('/:proId', authMiddleware, (req, res, next) => {
