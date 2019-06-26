@@ -25,7 +25,7 @@ router.put('/', authMiddleware, (req, res, next) => {
   const settings = user.settings ? { ...user.settings } : {}
 
   // flimsy?
-  const uneededFields = ['username', 'stripeCustId', 'createdAt', 'updatedAt', 'reviews', 'settings']
+  const uneededFields = ['avatar', 'username', 'stripeCustId', 'createdAt', 'updatedAt', 'reviews', 'settings']
   uneededFields.forEach((uneededField) => {
     delete user[uneededField]
   })
