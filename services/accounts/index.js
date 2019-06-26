@@ -59,17 +59,16 @@ exportsObj.register = (user) => {
         )
         .then(user => db.users.insertUser(user))
         .then((user) => {
-          const usrId = user.id
+          const userId = user.id
           const userSetting = {
             disableTrades: false,
             language: 'EN',
             currency: 'USD',
             notifOnLike: false,
             notifOnFollow: false,
-            notifOnFriendPost: false,
-            usrId
+            notifOnFriendPost: false
           }
-          return db.users.insertUserSettings(userSetting)
+          return db.users.insertUserSettings(userId, userSetting)
             .then(() => user)
         })
     })
