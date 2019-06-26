@@ -19,10 +19,27 @@ router.get('/', authMiddleware, (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.post('/settings', authMiddleware, (req, res, next) => {
-  const settings = req.body
-  return db.users.updateUserSettings(req.user.id, settings)
-    .then(result => res.json(result))
+router.put('/', authMiddleware, (req, res, next) => {
+  const userId = req.user.id
+  const user = req.body || {}
+  const settings = user.settings ? { ...user.settings } : {}
+
+  // flimsy?
+  const uneededFields = ['username', 'stripeCustId', 'createdAt', 'updatedAt', 'reviews', 'settings']
+  uneededFields.forEach((uneededField) => {
+    delete user[uneededField]
+  })
+
+  const updateUser = db.users.updateUser({
+    id: userId,
+    ...user
+  })
+  const updateUserSettings = db.users.updateUserSettings(userId, {
+    ...settings
+  })
+
+  return Promise.all([updateUser, updateUserSettings])
+    .then(() => res.json({ success: true }))
     .catch(err => next(err))
 })
 
