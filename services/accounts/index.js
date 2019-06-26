@@ -59,6 +59,7 @@ exportsObj.register = (user) => {
         )
         .then(user => db.users.insertUser(user))
         .then((user) => {
+          const usrId = user.id
           const userSetting = {
             disableTrades: false,
             language: 'EN',
