@@ -2,21 +2,21 @@ const exportsObj = {}
 
 const Like = require('../models').like
 
-exportsObj.getLikes = () => {
-	return Like.findAll()
-}
-
-exportsObj.getLike = (likeId) => {
-	return Like.findOne({ where: { id: likeId }})
+exportsObj.getLikesForProduct = (proId) => {
+	const options = {
+		where: {
+			proId
+		}
+	}
+	return Like.findAll(options)
 }
 
 exportsObj.insertLike = (like) => {
 	return Like.create(like)
 }
 
-exportsObj.deleteLike = (likeId) => {
-	return Like.destroy({ where: { id: likeId }})
-	  .then(() => ({ id: likeId }))
+exportsObj.deleteLike = (criteria) => {
+	return Like.destroy({ where: criteria })
 }
 
 module.exports = exportsObj
