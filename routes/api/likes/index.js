@@ -77,6 +77,7 @@ router.get('/', (req, res, next) => { // so we use this for many purposes, filte
               return Promise.all([userPromise, productPromise])
                 .then(([user, product]) => {
                   const result = {
+                    id: like.id,
                     liker: {
                       id: user.id,
                       avatar: user.avatar,
