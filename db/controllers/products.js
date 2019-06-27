@@ -17,6 +17,19 @@ const getPagination = (pageData) => {
   return options
 }
 
+exportsObj.getProduct = (productId) => {
+	const options = {
+		include: [{
+			model: User,
+			as: 'seller'
+		}],
+		where: {
+			id: productId
+		}
+	}
+	return Product.findOne(options)
+}
+
 exportsObj.getProducts = (config) => {
 	const filter = config.filter || {}
 	const pageData = config.pageData || {}
@@ -36,17 +49,13 @@ exportsObj.getProducts = (config) => {
 		})
 }
 
-exportsObj.getProduct = (productId) => {
+exportsObj.getByIds = (productIds = []) => {
 	const options = {
-		include: [{
-			model: User,
-			as: 'seller'
-		}],
 		where: {
-			id: productId
+			id: productIds
 		}
 	}
-	return Product.findOne(options)
+	return Product.findAll(options)
 }
 
 exportsObj.insertProduct = (product) => {

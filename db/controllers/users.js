@@ -33,6 +33,16 @@ exportsObj.getUser = (user, includePassword = false) => {
 		.then(options => User.findOne(options))
 }
 
+exportsObj.getByIds = (userIds = []) => {
+	const options = {
+		where: {
+			id: userIds
+		}
+	}
+	return addExcludes(options)
+		.then(options => User.findAll(options))
+}
+
 exportsObj.getUserSettings = (usrId) => {
 	return UserSetting.findOne({
 		where: { usrId }

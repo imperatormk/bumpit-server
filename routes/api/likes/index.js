@@ -16,10 +16,54 @@ router.get('/', (req, res, next) => { // so we use this for many purposes, filte
     let queryPromise = null
     if (proId) {
       queryPromise = db.likes.getLikesForProduct(proId)
+        .then(userIds => db.users.getByIds(userIds))
+        .then((users) => {
+          return users.map((user) => ({
+            avatar: user.avatar,
+            username: user.username
+          }))
+        })
     } else if (likerId) {
       queryPromise = db.likes.getUserLikes(likerId)
+        .then(productIds => db.products.getByIds(productIds))
+        .then((products) => {
+          return products.map((product) => ({
+            title: product.title,
+            images: product.images
+          }))
+        })
     } else if (likeeId) {
       queryPromise = db.likes.getLikesToUser(likeeId)
+        .then((likes) => {
+          return new Promise((resolve, reject) => {
+            const resultArr = likes.map((like) => {
+              const { proId, usrId } = like
+
+              const userPromise = db.users.getUser({ id: usrId })
+              const productPromise = db.products.getProduct(proId)
+
+              return Promise.all([userPromise, productPromise])
+                .then(([user, product]) => [user.toJSON(), product.toJSON()])
+                .then(([user, product]) => {
+                  const result = {
+                    liker: {
+                      avatar: user.avatar,
+                      username: user.username
+                    },
+                    product: {
+                      title: product.title,
+                      images: product.images
+                    },
+                    createdAt: like.createdAt
+                  }
+                  return result
+                })
+                .catch(err => reject(err))
+            })
+            resolve(resultArr)
+          })
+          .then(promiseArr => Promise.all(promiseArr))
+        })
     } else {
       queryPromise = Promise.reject({ status: 400, msg: 'invalidParams' })
     }

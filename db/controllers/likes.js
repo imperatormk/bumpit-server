@@ -11,8 +11,6 @@ exportsObj.getLikesForProduct = (proId) => {
 	}
 	return Like.findAll(options)
 		.then(likes => likes.map(like => like.usrId))
-		.then(users => ({ users })
-	)
 }
 
 exportsObj.isLikedByUser = (proId, usrId) => {
@@ -34,8 +32,6 @@ exportsObj.getUserLikes = (likerId) => {
 	}
 	return Like.findAll(options)
 		.then(likes => likes.map(like => like.proId))
-		.then(products => ({ products })
-	)
 }
 
 exportsObj.getLikesToUser = (likeeId) => {
