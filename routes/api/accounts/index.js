@@ -22,6 +22,14 @@ router.get('/:id', (req, res, next) => {
     .catch(err => next(err))
 })
 
+const groupBy = (arr, property) => {
+  return arr.reduce((memo, x) => {
+    if (!memo[x[property]]) memo[x[property]] = []
+    memo[x[property]].push(x)
+    return memo
+  }, {})
+}
+
 // get follower and followee count/objects for user
 router.post('/:id/connections', (req, res, next) => {
   const userId = req.params.id
@@ -62,39 +70,45 @@ router.post('/:id/connections', (req, res, next) => {
     })
     .then(connections => Promise.all(connections))
     .then((connections) => {
-      const followMap = { // rename
-        followee: {
-          promise: db.connections.followMe,
-          field: 'followsMe'
-        },
-        follower: {
-          promise: db.connections.followedByMe,
-          field: 'followedByMe'
-        }
+      const groupedConnections = groupBy(connections, 'type')
+      // rename
+      const followMap = {
+        followees: groupedConnections.followee || [],
+        followers: groupedConnections.follower || []
       }
 
       const meId = userId // rename?
-      const userIds = connections.map(connection => connection.user.id)
+      const followeeUserIds = followMap.followees.map(connection => connection.user.id)
+      const followerUserIds = followMap.followers.map(connection => connection.user.id)
 
-      return connections // !TODO: followPromise needs to be the wrapper, not the wrapped
-        .map((connection) => {
-          const userId = connection.user.id
-          const type = connection.type
-          const followPromise = followMap[type].promise
-          const followField = followMap[type].field
 
-          return followPromise(meId, userIds)
-            .then((userIdsRes) => {
-              const includes = userIdsRes.includes(userId)
-              const resObj = {
-                ...connection
-              }
-              resObj[followField] = includes
-              return resObj
-            })
+      const followeePromise = db.connections.isFollowingMe(meId, followeeUserIds)
+        .then((results) => {
+          return followMap.followees.map((followee) => {
+            const followsMe = results.includes(followee.user.id)
+            return {
+              ...followee,
+              followsMe
+            }
+          })
+        })
+
+      const followerPromise = db.connections.followedByMe(meId, followerUserIds)
+        .then((results) => {
+          return followMap.followers.map((follower) => {
+            const followedByMe = results.includes(follower.user.id)
+            return {
+              ...follower,
+              followedByMe
+            }
+          })
+        })
+
+      return Promise.all([followeePromise, followerPromise])
+        .then(([ followeeResult, followerResult ]) => {
+          return [ ...followeeResult, ...followerResult ]
         })
     })
-    .then(connections => Promise.all(connections))
     .then((connections) => {
       if (!count) return res.send(connections)
 

@@ -65,7 +65,7 @@ exportsObj.deleteConnection = (conId) => {
 	  .then(() => ({ id: conId }))
 }
 
-exportsObj.followMe = (meId, userIdVariant) => {
+exportsObj.isFollowingMe = (meId, userIdVariant) => {
 	const options = {
 		where: {
 			usrFromId: userIdVariant,
