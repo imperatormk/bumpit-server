@@ -92,14 +92,14 @@ router.post('/:proId', authMiddleware, (req, res, next) => {
         if (action === 'like') {
           db.likes.insertLike({ proId, usrId })
             .then(() => {
-              resolve({ status: 'success' })
+              resolve({ status: 'liked' })
             })
             .catch((errObj) => {
               const error = (errObj && errObj.name) ? errObj.name : ''
               const isDuplicate = error === 'SequelizeUniqueConstraintError'
 
               if (isDuplicate) {
-                resolve({ status: 'failed', msg: 'alreadyLiked', statusCode: 202 })
+                resolve({ status: 'liked', msg: 'alreadyLiked', statusCode: 202 })
               } else {
                 reject(errObj)
               }
@@ -107,7 +107,7 @@ router.post('/:proId', authMiddleware, (req, res, next) => {
         } else {
           db.likes.deleteLike({ proId, usrId })
             .then(() => {
-              resolve({ status: 'success' })
+              resolve({ status: 'unliked' })
             })
         }
       })
