@@ -65,4 +65,26 @@ exportsObj.deleteConnection = (conId) => {
 	  .then(() => ({ id: conId }))
 }
 
+exportsObj.followMe = (meId, userIdVariant) => {
+	const options = {
+		where: {
+			usrFromId: userIdVariant,
+			usrToId: meId
+		}
+	}
+	return Connection.findAll(options)
+		.then(connections => connections.map(connection => connection.usrFromId))
+}
+
+exportsObj.followedByMe = (meId, userIdVariant) => {
+	const options = {
+		where: {
+			usrFromId: meId,
+			usrToId: userIdVariant
+		}
+	}
+	return Connection.findAll(options)
+		.then(connections => connections.map(connection => connection.usrToId))
+}
+
 module.exports = exportsObj

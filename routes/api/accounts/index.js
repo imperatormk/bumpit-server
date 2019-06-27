@@ -36,7 +36,68 @@ router.post('/:id/connections', (req, res, next) => {
     })
     .then((user) => db.connections.getConnectionsForUser(user.id, types))
     .then((connections) => {
+      return connections.map((connection) => {
+        const conUserId = connection.userId
+
+        // TODO: this probably deserves getUsers instead
+        return db.users.getUserById(conUserId)
+          .then((user) => {
+            const userDto = {
+              id: user.id,
+              avatar: user.avatar,
+              username: user.username,
+              name: user.name,
+              surname: user.surname
+            }
+            return userDto
+          })
+          .then((userDto) => {
+            const connectionDto = {
+              type: connection.type,
+              user: userDto
+            }
+            return connectionDto
+          })
+      })
+    })
+    .then(connections => Promise.all(connections))
+    .then((connections) => {
+      const followMap = { // rename
+        followee: {
+          promise: db.connections.followMe,
+          field: 'followsMe'
+        },
+        follower: {
+          promise: db.connections.followedByMe,
+          field: 'followedByMe'
+        }
+      }
+
+      const meId = userId // rename?
+      const userIds = connections.map(connection => connection.user.id)
+
+      return connections // !TODO: followPromise needs to be the wrapper, not the wrapped
+        .map((connection) => {
+          const userId = connection.user.id
+          const type = connection.type
+          const followPromise = followMap[type].promise
+          const followField = followMap[type].field
+
+          return followPromise(meId, userIds)
+            .then((userIdsRes) => {
+              const includes = userIdsRes.includes(userId)
+              const resObj = {
+                ...connection
+              }
+              resObj[followField] = includes
+              return resObj
+            })
+        })
+    })
+    .then(connections => Promise.all(connections))
+    .then((connections) => {
       if (!count) return res.send(connections)
+
       let followerCount = 0
       let followeeCount = 0
 
