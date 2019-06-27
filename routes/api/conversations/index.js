@@ -1,7 +1,7 @@
 const router = require('express').Router()
 
 const db = require(__basedir + '/db/controllers')
-const authMiddleware = require(__basedir + '/services/auth').middleware
+const authMiddleware = require(__basedir + '/services/auth').middleware()
 
 router.get('/:id', authMiddleware, (req, res, next) => {
   const cnvId = req.params.id

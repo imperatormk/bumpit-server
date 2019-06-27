@@ -28,19 +28,30 @@ router.get('/', (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.get('/:id', (req, res, next) => {
+router.get('/:id', authMiddleware({ optional: true }), (req, res, next) => {
   const id = req.params.id
+  const { user } = req
 
   return db.products.getProduct(id)
     .then((product) => {
       if (!product)
         throw { status: 404, msg: 'notFound' }
-      return res.send(product)
+      return product.toJSON()
+    })
+    .then((product) => {
+      if (!user) return res.send(product)
+
+      return db.likes.isLikedByUser(product.id, user.id)
+        .then((isLikedByUser) => ({
+          ...product,
+          likedByMe: isLikedByUser
+        }))
+        .then(product => res.send(product))
     })
     .catch(err => next(err))
 })
 
-router.post('/', authMiddleware, (req, res, next) => {
+router.post('/', authMiddleware(), (req, res, next) => {
   const product = req.body
   const seller = req.user
   
@@ -53,7 +64,7 @@ router.post('/', authMiddleware, (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.post('/:id/images', authMiddleware, uploadMiddleware('productImages').single('productImage'), (req, res, next) => {
+router.post('/:id/images', authMiddleware(), uploadMiddleware('productImages').single('productImage'), (req, res, next) => {
   const productId = req.params.id
   const productImageFile = req.file
   const seller = req.user
@@ -81,7 +92,7 @@ router.post('/:id/images', authMiddleware, uploadMiddleware('productImages').sin
     .catch(err => next(err))
 })
 
-router.delete('/:id', authMiddleware, (req, res, next) => {
+router.delete('/:id', authMiddleware(), (req, res, next) => {
   const productId = req.params.id
   const seller = req.user
 

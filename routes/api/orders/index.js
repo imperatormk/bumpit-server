@@ -1,6 +1,6 @@
 const router = require('express').Router()
 
-const authMiddleware = require(__basedir + '/services/auth').middleware
+const authMiddleware = require(__basedir + '/services/auth').middleware()
 const db = require(__basedir + '/db/controllers')
 
 const paymentsService = require(__basedir + '/services/payments')
