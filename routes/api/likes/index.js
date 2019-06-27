@@ -48,7 +48,10 @@ router.get('/', (req, res, next) => { // so we use this for many purposes, filte
           return db.products.getByIds(productIds)
             .then(products => products.map((product) => ({
               title: product.title,
-              images: product.images
+              images: product.images,
+              price: product.price,
+              currency: product.currency,
+              status: product.status
             })))
             .then((products) => ({
               content: products,
@@ -78,7 +81,8 @@ router.get('/', (req, res, next) => { // so we use this for many purposes, filte
                     },
                     product: {
                       title: product.title,
-                      images: product.images
+                      images: product.images,
+                      status: product.status
                     },
                     createdAt: like.createdAt
                   }
