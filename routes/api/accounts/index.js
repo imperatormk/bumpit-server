@@ -22,6 +22,7 @@ router.get('/:id', (req, res, next) => {
     .catch(err => next(err))
 })
 
+// get follower and followee count/objects for user
 router.post('/:id/connections', (req, res, next) => {
   const userId = req.params.id
   const config = req.body || {}
@@ -53,6 +54,7 @@ router.post('/:id/connections', (req, res, next) => {
     .catch(err => next(err))
 })
 
+// commit actions: follow, unfollow (and block?)
 router.put('/:id/social', authMiddleware, (req, res, next) => {
   const userId = req.params.id
   const action = req.body.action || ''

@@ -4,7 +4,14 @@ const db = require(__basedir + '/db/controllers')
 const authMiddleware = require(__basedir + '/services/auth').middleware()
 
 router.get('/', (req, res, next) => { // so we use this for many purposes, filtering and different models
+  const config = {}
+
+  // TODO: move this to helpers the next time it's needed
+  const { page, size, by, order } = req.query
+  config.pageData = { page, size, by, order }
+
   const { proId, likerId, likeeId } = req.query
+  config.filter = {}
 
   /*
     - proId: get likes for product
@@ -15,26 +22,46 @@ router.get('/', (req, res, next) => { // so we use this for many purposes, filte
   if (proId || likerId || likeeId) {
     let queryPromise = null
     if (proId) {
-      queryPromise = db.likes.getLikesForProduct(proId)
-        .then(userIds => db.users.getByIds(userIds))
-        .then((users) => {
-          return users.map((user) => ({
-            avatar: user.avatar,
-            username: user.username
-          }))
+      config.filter.proId = proId
+      queryPromise = db.likes.getLikesForProduct(config)
+        .then((result) => {
+          const userIds = result.content
+          const totalElements = result.totalElements
+
+          return db.users.getByIds(userIds)
+            .then(users => users.map((user) => ({
+              avatar: user.avatar,
+              username: user.username
+            })))
+            .then((users) => ({
+              content: users,
+              totalElements
+            }))
         })
     } else if (likerId) {
-      queryPromise = db.likes.getUserLikes(likerId)
-        .then(productIds => db.products.getByIds(productIds))
-        .then((products) => {
-          return products.map((product) => ({
-            title: product.title,
-            images: product.images
-          }))
+      config.filter.usrId = likerId
+      queryPromise = db.likes.getUserLikes(config)
+        .then((result) => {
+          const productIds = result.content
+          const totalElements = result.totalElements
+
+          return db.products.getByIds(productIds)
+            .then(products => products.map((product) => ({
+              title: product.title,
+              images: product.images
+            })))
+            .then((products) => ({
+              content: products,
+              totalElements
+            }))
         })
     } else if (likeeId) {
-      queryPromise = db.likes.getLikesToUser(likeeId)
-        .then((likes) => {
+      config.filter.selId = likeeId
+      queryPromise = db.likes.getLikesToUser(config)
+        .then((result) => {
+          const likes = result.content
+          const totalElements = result.totalElements
+
           return new Promise((resolve, reject) => {
             const resultArr = likes.map((like) => {
               const { proId, usrId } = like
@@ -43,7 +70,6 @@ router.get('/', (req, res, next) => { // so we use this for many purposes, filte
               const productPromise = db.products.getProduct(proId)
 
               return Promise.all([userPromise, productPromise])
-                .then(([user, product]) => [user.toJSON(), product.toJSON()])
                 .then(([user, product]) => {
                   const result = {
                     liker: {
@@ -60,9 +86,12 @@ router.get('/', (req, res, next) => { // so we use this for many purposes, filte
                 })
                 .catch(err => reject(err))
             })
-            resolve(resultArr)
+            resolve(Promise.all(resultArr))
           })
-          .then(promiseArr => Promise.all(promiseArr))
+          .then((likesArr) => ({
+            content: likesArr,
+            totalElements
+          }))
         })
     } else {
       queryPromise = Promise.reject({ status: 400, msg: 'invalidParams' })

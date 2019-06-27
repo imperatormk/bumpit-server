@@ -3,6 +3,7 @@ const exportsObj = {}
 const Product = require('../models').product
 const User = require('../models').user
 
+// TODO: move to a shared location
 const getPagination = (pageData) => {
   const limit = pageData.size || 100
 	const page = pageData.page || 1

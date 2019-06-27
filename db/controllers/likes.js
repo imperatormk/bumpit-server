@@ -3,14 +3,88 @@ const exportsObj = {}
 const Like = require('../models').like
 const Product = require('../models').product
 
-exportsObj.getLikesForProduct = (proId) => {
+// TODO: move to a shared location
+const getPagination = (pageData) => {
+  const limit = pageData.size || 100
+	const page = pageData.page || 1
+	const by = pageData.by || 'id'
+	const order = pageData.order || 'ASC'
+	
 	const options = {
-		where: {
-			proId
-		}
+    limit,
+    offset: limit * (page - 1),
+		order: [[by, order]],
+  }
+  return options
+}
+
+exportsObj.getLikesForProduct = (config) => {
+	const filter = config.filter || {}
+	const pageData = config.pageData || {}
+
+	const options = {
+		where: filter,
+		...getPagination(pageData)
 	}
+
 	return Like.findAll(options)
 		.then(likes => likes.map(like => like.usrId))
+		.then((userIds) => {
+			return Like.count({ where: filter })
+				.then((count) => ({
+					totalElements: count,
+					content: userIds
+				}))
+		})
+}
+
+exportsObj.getUserLikes = (config) => {
+	const filter = config.filter || {}
+	const pageData = config.pageData || {}
+
+	const options = {
+		where: filter,
+		...getPagination(pageData)
+	}
+
+	return Like.findAll(options)
+		.then(likes => likes.map(like => like.proId))
+		.then((productIds) => {
+			return Like.count({ where: filter })
+				.then((count) => ({
+					totalElements: count,
+					content: productIds
+				}))
+		})
+}
+
+exportsObj.getLikesToUser = (config) => {
+	const filter = config.filter || {}
+	const pageData = config.pageData || {}
+
+	const productOptions = {
+		where: filter,
+		...getPagination(pageData)
+	}
+
+	return Product.findAll(productOptions)
+		.then(products => products.map(product => product.id))
+		.then((productIds) => {
+			return Product.count({ where: filter })
+				.then((count) => {
+					const likeOptions = {
+						where: {
+							proId: productIds
+						}
+					}
+
+					return Like.findAll(likeOptions)
+						.then((likes) => ({
+							totalElements: count,
+							content: likes
+						}))
+				})
+		})
 }
 
 exportsObj.isLikedByUser = (proId, usrId) => {
@@ -22,34 +96,6 @@ exportsObj.isLikedByUser = (proId, usrId) => {
 	}
 	return Like.findOne(options)
 		.then(like => !!like)
-}
-
-exportsObj.getUserLikes = (likerId) => {
-	const options = {
-		where: {
-			usrId: likerId
-		}
-	}
-	return Like.findAll(options)
-		.then(likes => likes.map(like => like.proId))
-}
-
-exportsObj.getLikesToUser = (likeeId) => {
-	const productOptions = {
-		where: {
-			selId: likeeId
-		}
-	}
-	return Product.findAll(productOptions)
-		.then(products => products.map(product => product.id))
-		.then((productIds) => {
-			const likeOptions = {
-				where: {
-					proId: productIds
-				}
-			}
-			return Like.findAll(likeOptions)
-		})
 }
 
 exportsObj.insertLike = (like) => {
