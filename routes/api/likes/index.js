@@ -30,6 +30,7 @@ router.get('/', (req, res, next) => { // so we use this for many purposes, filte
 
           return db.users.getByIds(userIds)
             .then(users => users.map((user) => ({
+              id: user.id,
               avatar: user.avatar,
               username: user.username
             })))
@@ -47,6 +48,7 @@ router.get('/', (req, res, next) => { // so we use this for many purposes, filte
 
           return db.products.getByIds(productIds)
             .then(products => products.map((product) => ({
+              id: product.id,
               title: product.title,
               images: product.images,
               price: product.price,
@@ -76,10 +78,12 @@ router.get('/', (req, res, next) => { // so we use this for many purposes, filte
                 .then(([user, product]) => {
                   const result = {
                     liker: {
+                      id: user.id,
                       avatar: user.avatar,
                       username: user.username
                     },
                     product: {
+                      id: product.id,
                       title: product.title,
                       images: product.images,
                       status: product.status
