@@ -2,6 +2,7 @@ const exportsObj = {}
 
 const Product = require('../models').product
 const User = require('../models').user
+const ConnectionsCtrl = require('../controllers/connections')
 
 // TODO: move to a shared location
 const getPagination = (pageData) => {
@@ -48,6 +49,32 @@ exportsObj.getProducts = (config) => {
 					content: products
 				}))
 		})
+}
+
+exportsObj.getProductsByFollowees = (config, userId) => {
+	const filter = config.filter || {}
+	const pageData = config.pageData || {}
+
+	return ConnectionsCtrl.getConnectionsForUser(userId, ['followees'])
+		.then((connections) => {
+			const userIds = connections.map(connection => connection.userId)
+			filter.selId = userIds
+
+			const options = {
+				where: filter,
+				...getPagination(pageData)
+			}
+
+			return Product.findAll(options)
+				.then((products) => {
+					return Product.count({ where: filter })
+						.then((count) => ({
+							totalElements: count,
+							content: products
+						}))
+				})
+		})
+
 }
 
 exportsObj.getByIds = (productIds = []) => {

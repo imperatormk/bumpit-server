@@ -4,16 +4,16 @@ const uploadMiddleware = require(__basedir + '/helpers').uploadMiddleware
 const authMiddleware = require(__basedir + '/services/auth').middleware
 const db = require(__basedir + '/db/controllers')
 
-router.get('/', (req, res, next) => {
+const processQueryParams = (query = {}) => {
   const config = {}
 
   // TODO: move this to helpers the next time it's needed
-  const { page, size, by, order } = req.query
+  const { page, size, by, order } = query
   config.pageData = { page, size, by, order }
 
   const filter = {}
-  const filterKeys = Object.keys(req.query).filter(key => !['page', 'size', 'by', 'order'].includes(key))
-  filterKeys.forEach(key => filter[key] = req.query[key])
+  const filterKeys = Object.keys(query).filter(key => !['page', 'size', 'by', 'order'].includes(key))
+  filterKeys.forEach(key => filter[key] = query[key])
 
   Object.keys(filter)
     .forEach((key) => {
@@ -23,7 +23,24 @@ router.get('/', (req, res, next) => {
     })
   config.filter = filter
 
+  return config
+}
+
+router.get('/', (req, res, next) => {
+  const config = processQueryParams(req.query)
+
   return db.products.getProducts(config)
+    .then(products => res.send(products))
+    .catch(err => next(err))
+})
+
+router.get('/following', authMiddleware({ optional: true }), (req, res, next) => {
+  const userId = req.user.id
+  const config = processQueryParams(req.query)
+
+  return db.products.getProductsByFollowees({
+    pageData: config.pageData
+  }, userId)
     .then(products => res.send(products))
     .catch(err => next(err))
 })
