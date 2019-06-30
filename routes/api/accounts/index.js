@@ -79,14 +79,13 @@ router.post('/:id/connections', authMiddleware({ optional: true }), (req, res, n
         followers: groupedConnections.follower || []
       }
 
-      const meId = userId // rename?
       const followeeUserIds = followMap.followees.map(connection => connection.user.id)
       const followerUserIds = followMap.followers.map(connection => connection.user.id)
 
-      const followeePromise = db.connections.isFollowingMe(meId, followeeUserIds)
+      const followeePromise = db.connections.isFollowingMe(myUserId, followeeUserIds)
         .then((results) => {
           return followMap.followees.map((followee) => {
-            const followsMe = results.includes(myUserId)
+            const followsMe = results.includes(followee.user.id)
             return {
               ...followee,
               followsMe
@@ -94,10 +93,10 @@ router.post('/:id/connections', authMiddleware({ optional: true }), (req, res, n
           })
         })
 
-      const followerPromise = db.connections.followedByMe(meId, followerUserIds)
+      const followerPromise = db.connections.followedByMe(myUserId, followerUserIds)
         .then((results) => {
           return followMap.followers.map((follower) => {
-            const followedByMe = results.includes(myUserId)
+            const followedByMe = results.includes(follower.user.id)
             return {
               ...follower,
               followedByMe
