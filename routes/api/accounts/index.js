@@ -2,7 +2,7 @@ const router = require('express').Router()
 
 const db = require(__basedir + '/db/controllers')
 const registerService = require(__basedir + '/services/accounts').register
-const authMiddleware = require(__basedir + '/services/auth').middleware()
+const authMiddleware = require(__basedir + '/services/auth').middleware
 
 router.post('/register', (req, res, next) => {
   const user = req.body
@@ -31,8 +31,10 @@ const groupBy = (arr, property) => {
 }
 
 // get follower and followee count/objects for user
-router.post('/:id/connections', (req, res, next) => {
+router.post('/:id/connections', authMiddleware({ optional: true }), (req, res, next) => {
+  const myUserId = req.user ? req.user.id : -1
   const userId = req.params.id
+
   const config = req.body || {}
   const types = config.types || []
   const count = config.count === true
@@ -81,11 +83,10 @@ router.post('/:id/connections', (req, res, next) => {
       const followeeUserIds = followMap.followees.map(connection => connection.user.id)
       const followerUserIds = followMap.followers.map(connection => connection.user.id)
 
-
       const followeePromise = db.connections.isFollowingMe(meId, followeeUserIds)
         .then((results) => {
           return followMap.followees.map((followee) => {
-            const followsMe = results.includes(followee.user.id)
+            const followsMe = results.includes(myUserId)
             return {
               ...followee,
               followsMe
@@ -96,7 +97,7 @@ router.post('/:id/connections', (req, res, next) => {
       const followerPromise = db.connections.followedByMe(meId, followerUserIds)
         .then((results) => {
           return followMap.followers.map((follower) => {
-            const followedByMe = results.includes(follower.user.id)
+            const followedByMe = results.includes(myUserId)
             return {
               ...follower,
               followedByMe
@@ -130,7 +131,7 @@ router.post('/:id/connections', (req, res, next) => {
 })
 
 // commit actions: follow, unfollow (and block?)
-router.put('/:id/social', authMiddleware, (req, res, next) => {
+router.put('/:id/social', authMiddleware(), (req, res, next) => {
   const userId = req.params.id
   const action = req.body.action || ''
 

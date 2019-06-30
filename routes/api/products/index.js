@@ -38,9 +38,7 @@ router.get('/following', authMiddleware({ optional: true }), (req, res, next) =>
   const userId = req.user.id
   const config = processQueryParams(req.query)
 
-  return db.products.getProductsByFollowees({
-    pageData: config.pageData
-  }, userId)
+  return db.products.getProductsByFollowees(config, userId)
     .then(products => res.send(products))
     .catch(err => next(err))
 })
