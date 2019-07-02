@@ -6,8 +6,7 @@ exportsObj.getFees = (enabledOnly) => {
   const processingFee = {
     name: 'processingFee',
     flat: {
-      amount: 30,
-      currency: 'USD' // needed?
+      amount: 30
     },
     percentage: 2.9,
     enabled: true
@@ -32,8 +31,7 @@ exportsObj.getExtras = () => {
   const authenticationService = {
     name: 'authenticationService',
     flat: {
-      amount: 10,
-      currency: 'USD' // needed?
+      amount: 10
     },
     percentage: 8
   }

@@ -67,7 +67,6 @@ const prepareOrder = (order, mode) => { // here mode is a bit stiff but okay
 
       const charge = {
         amount: product.price,
-        currency: product.currency
       }
 
       const initial = { ...charge }
@@ -81,6 +80,7 @@ const prepareOrder = (order, mode) => { // here mode is a bit stiff but okay
                 proId: product.id,
                 usrId: userId,
                 shippingInfo: JSON.stringify(shippingInfo),
+                chargeSummary: JSON.stringify(chargesList),
                 status: 'PROCESSED'
               },
               charge: {
@@ -131,7 +131,6 @@ router.post('/create', authMiddleware, (req, res, next) => {
           return db.orders.insertOrder(order)
             .then((orderEntry) => {
               const chargeEntry = {
-                currency: charge.currency,
                 stage: 'ESCROW',
                 ordId: orderEntry.id
               }

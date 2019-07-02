@@ -49,7 +49,7 @@ exportsObj.chargeAmount = (totalCharge, userId) => {
           }
           if (!balanceResult.flag) totalResult.balanceResult = 'SUCCESS'
 
-          const bankCharge = { ...totalCharge, amount: bankAmount }
+          const bankCharge = { ...totalCharge, amount: bankAmount, currency: 'usd' } // resorted to hardcoded currency
           const bankAction = willUseBank ?
             chargeFromBankAccount(bankCharge) :
             Promise.resolve({ flag: true })
@@ -166,7 +166,6 @@ exportsObj.refundOrder = (orderId, refAmount) => {
       const totalAmount = bankCharge.amount + balanceCharge.amount
 
       const amount = (refAmount > 0 && refAmount <= totalAmount) ? refAmount : totalAmount
-      const currency = charge.currency
       const buyer = order.buyer
 
       return moveFromToAccountBalance(amount, buyer.stripeCustId)
@@ -175,7 +174,6 @@ exportsObj.refundOrder = (orderId, refAmount) => {
             return Promise.reject({ status: 500, msg: 'refundFailed' })
           return db.refunds.insertRefund({
             amount,
-            currency,
             status: 'COMPLETED',
             ordId: orderId
           })

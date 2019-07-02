@@ -4,10 +4,10 @@ module.exports = (sequelize, DataTypes) => {
     title: DataTypes.STRING,
     details: DataTypes.TEXT,
     condition: DataTypes.INTEGER,
-    price: DataTypes.FLOAT,
-    currency: DataTypes.STRING,
+    price: DataTypes.INTEGER,
     size: DataTypes.STRING,
     location: DataTypes.STRING,
+    shippingCost: DataTypes.INTEGER,
     status: DataTypes.STRING,
   }, {
     defaultScope: {

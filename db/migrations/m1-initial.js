@@ -229,10 +229,6 @@ const products = (Sequelize) => ({
     type: Sequelize.INTEGER,
     allowNull: false
   },
-  currency: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
   size: {
     type: Sequelize.STRING,
     allowNull: false
@@ -240,6 +236,10 @@ const products = (Sequelize) => ({
   location: {
     type: Sequelize.STRING,
     allowNull: false
+  },
+  shippingCost: {
+    type: Sequelize.INTEGER,
+    defaultValue: 0
   },
   status: {
     type: Sequelize.STRING,
@@ -376,6 +376,10 @@ const orders = (Sequelize) => ({
     type: Sequelize.INTEGER
   },
   shippingInfo: {
+    type: Sequelize.JSON,
+    allowNull: false
+  },
+  chargeSummary: {
     type: Sequelize.JSON,
     allowNull: false
   },
@@ -533,10 +537,6 @@ const charges = (Sequelize) => ({
     type: Sequelize.STRING,
     allowNull: false
   },
-  currency: {
-    type: Sequelize.STRING,
-    allowNull: false
-  },
   ordId: {
     type: Sequelize.INTEGER,
     onDelete: 'CASCADE',
@@ -566,10 +566,6 @@ const refunds = (Sequelize) => ({
   },
   amount: {
     type: Sequelize.INTEGER,
-    allowNull: false
-  },
-  currency: {
-    type: Sequelize.STRING,
     allowNull: false
   },
   status: {

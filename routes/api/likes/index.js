@@ -52,7 +52,6 @@ router.get('/', (req, res, next) => { // so we use this for many purposes, filte
               title: product.title,
               images: product.images,
               price: product.price,
-              currency: product.currency,
               status: product.status
             })))
             .then((products) => ({

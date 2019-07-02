@@ -1,7 +1,6 @@
 'use strict';
 module.exports = (sequelize, DataTypes) => {
   const Charge = sequelize.define('charge', {
-    currency: DataTypes.STRING,
     stage: DataTypes.STRING,
   });
   Charge.associate = function(models) {
