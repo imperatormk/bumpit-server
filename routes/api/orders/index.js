@@ -66,11 +66,15 @@ const prepareOrder = (order, mode) => { // here mode is a bit stiff but okay
         throw { status: 400, msg: 'noShippingInfo' }
 
       const charge = {
-        amount: product.price,
+        amount: product.price
+      }
+
+      const shipping = {
+        amount: product.shippingCost
       }
 
       const initial = { ...charge }
-      const calculateChargesList = paymentsService.calculateChargesList(initial, extras)
+      const calculateChargesList = paymentsService.calculateChargesList(initial, shipping, extras)
 
       return calculateChargesList
         .then((chargesList) => {

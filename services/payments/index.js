@@ -5,7 +5,7 @@ const platformCharges = require(__basedir + '/services/platform/charges')
 
 const exportsObj = {}
 
-exportsObj.calculateChargesList = (initial, extras) => {
+exportsObj.calculateChargesList = (initial, shipping, extras) => {
   const proms = [
     platformCharges.getFees(true)
   ]
@@ -15,7 +15,8 @@ exportsObj.calculateChargesList = (initial, extras) => {
   return Promise.all(proms)
     .then(([fees, allExtras]) => {
       const initialCharge = { name: 'initial', flat: { ...initial }, type: 'base' }
-      const charges = [initialCharge]
+      const shippingCharge = { name: 'shipping', flat: { ...shipping }, type: 'base' }
+      const charges = [initialCharge, shippingCharge]
       fees.forEach((fee) => {
         delete fee.enabled
         fee.type = 'fee'
