@@ -5,8 +5,36 @@ const Product = require('../models').product
 const Shipping = require('../models').shipping
 const User = require('../models').user
 
-exportsObj.getOrders = () => {
-	return Order.findAll()
+exportsObj.getBoughtOrders = (userId) => {
+	const options = {
+		where: {
+			usrId: userId
+		},
+		include: [{
+			model: Product,
+			as: 'product'
+		}]
+	}
+	return Order.findAll(options)
+}
+
+exportsObj.getSoldOrders = (userId) => {
+	const productOptions = {
+		where: {
+			selId: userId
+		},
+		attributes: ['id']
+	}
+	return Product.findAll(productOptions)
+		.then(products => products.map(product => product.id))
+		.then((productIds) => {
+			const orderOptions = {
+				where: {
+					proId: productIds
+				}
+			}
+			return Order.findAll(orderOptions)
+		})
 }
 
 exportsObj.getOrderById = (orderId) => {

@@ -3,7 +3,7 @@ const exportsObj = {}
 const Connection = require('../models').connection
 const Op = require('sequelize').Op
 
-exportsObj.getConnectionsForUser = (userId, config = []) => { // TODO: think about private?
+exportsObj.getConnectionsForUser = (userId, config = []) => {
 	const fields = {
 		followees: 'usrFromId',
 		followers: 'usrToId'

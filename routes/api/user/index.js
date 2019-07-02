@@ -43,7 +43,21 @@ router.put('/', authMiddleware, (req, res, next) => {
     .catch(err => next(err))
 })
 
-router.get('/shippingInfo', authMiddleware, (req, res) => { // TODO: move this
+router.get('/orders/bought', authMiddleware, (req, res, next) => {
+  const userId = req.user.id
+  return db.orders.getBoughtOrders(userId)
+    .then(orders => res.json(orders))
+    .catch(err => next(err))
+})
+
+router.get('/orders/sold', authMiddleware, (req, res, next) => {
+  const userId = req.user.id
+  return db.orders.getSoldOrders(userId)
+    .then(orders => res.json(orders))
+    .catch(err => next(err))
+})
+
+router.get('/shippingInfo', authMiddleware, (req, res, next) => { // TODO: move this
   const userId = req.user.id
   return db.shippingInfos.getShippingInfoForUser(userId)
     .then((shippingInfo) => {
@@ -56,7 +70,7 @@ router.post('/shippingInfo', authMiddleware, (req, res, next) => { // TODO: move
   const userId = req.user.id
   const data = req.body
 
-  return db.shippingInfos.getShippingInfoForUser(userId) // TODO: maybe compare user ids here
+  return db.shippingInfos.getShippingInfoForUser(userId)
     .then((shippingInfo) => {
       const { id } = shippingInfo
       const shippingInfoObj = {
