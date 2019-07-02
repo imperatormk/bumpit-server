@@ -71,6 +71,7 @@ router.post('/', authMiddleware(), (req, res, next) => {
   const seller = req.user
   
   product.price = product.price * 100 // convert to cents
+  product.shippingCost = product.shippingCost * 100 // convert to cents
   product.selId = seller.id
   product.location = seller.location
 
