@@ -125,6 +125,8 @@ router.post('/:proId', authMiddleware, (req, res, next) => {
     .then((product) => {
       if (!product)
         throw { status: 400, msg: 'badProduct' }
+      if (product.seller.id === usrId)
+        throw { status: 204, msg: 'cantWithOwn' }
       const actionProm = new Promise((resolve, reject) => {
         if (action === 'like') {
           db.likes.insertLike({ proId, usrId })
