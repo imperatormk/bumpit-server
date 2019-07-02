@@ -7,12 +7,19 @@ const paymentsService = require(__basedir + '/services/payments')
 const chargesService = require(__basedir + '/services/payments').charges
 const eventsService = require(__basedir + '/services/events')
 
-router.get('/:id', (req, res, next) => {
+router.get('/:id', authMiddleware, (req, res, next) => {
+  const userId = req.user.id
   const id = req.params.id
+
+  const checkOrderOwnership = (order, userId) => { // TODO: move from here?
+    return order.usrId === userId || order.product.seller.id === userId
+  }
+
   return db.orders.getOrderById(id)
-    .then((product) => {
-      if (!product) throw { status: 404, msg: 'notFound' }
-      return res.send(product)
+    .then((order) => {
+      if (!order) throw { status: 404, msg: 'notFound' }
+      if (!checkOrderOwnership(order, userId)) throw { status: 403, msg: 'orderNotOwned' }
+      return res.send(order)
     })
     .catch(err => next(err))
 })
