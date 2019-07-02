@@ -23,10 +23,6 @@ exportsObj.getSoldOrders = (userId) => {
 		where: {
 			selId: userId
 		},
-		include: [{
-			model: Product,
-			as: 'product'
-		}],
 		attributes: ['id']
 	}
 	return Product.findAll(productOptions)
@@ -35,7 +31,11 @@ exportsObj.getSoldOrders = (userId) => {
 			const orderOptions = {
 				where: {
 					proId: productIds
-				}
+				},
+				include: [{
+					model: Product,
+					as: 'product'
+				}]
 			}
 			return Order.findAll(orderOptions)
 		})
