@@ -20,7 +20,9 @@ router.get('/:id', authMiddleware, (req, res, next) => {
   return db.orders.getOrderById(id)
     .then((order) => {
       if (!order) throw { status: 404, msg: 'notFound' }
-
+      return order.toJSON()
+    })
+    .then((order) => {
       const userRoleInOrder = getOrderOwnership(order, userId)
       if (!userRoleInOrder) throw { status: 403, msg: 'orderNotOwned' }
 
