@@ -11,15 +11,23 @@ router.get('/:id', authMiddleware, (req, res, next) => {
   const userId = req.user.id
   const id = req.params.id
 
-  const checkOrderOwnership = (order, userId) => { // TODO: move from here?
-    return order.usrId === userId || order.product.seller.id === userId
+  const getOrderOwnership = (order, userId) => { // TODO: move from here?
+    if (order.usrId === userId) return 'buyer'
+    if (order.product.seller.id === userId) return 'seller'
+    return null 
   }
 
   return db.orders.getOrderById(id)
     .then((order) => {
       if (!order) throw { status: 404, msg: 'notFound' }
-      if (!checkOrderOwnership(order, userId)) throw { status: 403, msg: 'orderNotOwned' }
-      return res.send(order)
+
+      const userRoleInOrder = getOrderOwnership(order, userId)
+      if (!userRoleInOrder) throw { status: 403, msg: 'orderNotOwned' }
+
+      return res.send({
+        ...order,
+        userRoleInOrder
+      })
     })
     .catch(err => next(err))
 })
